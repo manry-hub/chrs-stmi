@@ -5,12 +5,24 @@ import { ReportCard } from "./ReportCard";
 import { Loader2 } from "lucide-react";
 
 export function UserReportList({ userId }: { userId: string }) {
-  const { reports, loading } = useUserReports(userId);
+  const { reports, loading, error } = useUserReports(userId);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
         <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <p className="font-semibold mb-1">Terjadi kesalahan saat memuat laporan:</p>
+        <p className="opacity-80">{error}</p>
+        <p className="mt-2 text-xs italic">
+          Bila ini kesalahan pertama, kemungkinan database sedang melakukan pembaharuan indeks. Silakan coba lagi dalam beberapa menit.
+        </p>
       </div>
     );
   }

@@ -1,0 +1,46 @@
+"use server";
+
+import { auth } from "@/lib/auth";
+import { adminDb } from "@/lib/firebase/admin";
+
+export async function getAnalytics() {
+  const session = await auth();
+  if (session?.user.role !== "superadmin") throw new Error("Unauthorized");
+
+  const reportsSnap = await adminDb.collection("reports").get();
+  const reports = reportsSnap.docs.map((d) => d.data());
+
+  const total = reports.length;
+  const pending = reports.filter((r) => r.status === "pending").length;
+  const confirmed = reports.filter((r) => r.status === "confirmed").length;
+
+  // Average response time: createdAt → first "confirmed" log
+  const responseTimes: number[] = [];
+
+  for (const doc of reportsSnap.docs) {
+    if (doc.data().status !== "confirmed") continue;
+    const logsSnap = await adminDb
+      .collection("reports")
+      .doc(doc.id)
+      .collection("logs")
+      .where("action", "==", "confirmed")
+      .orderBy("createdAt", "asc")
+      .limit(1)
+      .get();
+
+    if (!logsSnap.empty) {
+      const created = doc.data().createdAt?.seconds ?? 0;
+      const confirmedTime = logsSnap.docs[0].data().createdAt?.seconds ?? 0;
+      if (created && confirmedTime) {
+        responseTimes.push((confirmedTime - created) / 60); // minutes
+      }
+    }
+  }
+
+  const avgResponseMinutes =
+    responseTimes.length > 0
+      ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
+      : null;
+
+  return { total, pending, confirmed, avgResponseMinutes };
+}

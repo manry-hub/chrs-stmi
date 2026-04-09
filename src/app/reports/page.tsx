@@ -1,4 +1,4 @@
-import { adminDb } from "@/lib/firebase/adminApp";
+import { adminDb } from "@/lib/firebase/admin";
 import { ReportCard } from "@/components/report/ReportCard";
 import { ReportDocument } from "@/types";
 import { Map } from "lucide-react";
@@ -50,7 +50,7 @@ export default async function PublicReportsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {reports.map((report) => (
+            {reports.map((report: ReportDocument) => (
               <ReportCard key={report.id} report={report} />
             ))}
           </div>

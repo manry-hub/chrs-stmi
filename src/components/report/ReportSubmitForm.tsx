@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+
 import { useRouter } from "next/navigation";
-import { reportSchema, ReportInput } from "@/lib/validations/report";
+import type { SubmitReportInput as ReportInput } from "@/lib/validations/report";
+import { submitReport } from "@/actions/reports/submitReport";
 import { Button } from "../ui/Button";
 import { Textarea } from "../ui/Textarea";
 import { Label } from "../ui/Label";
 import { ImagePreview } from "./ImagePreview";
 import { LocationPicker } from "./LocationPicker";
 import { ROUTES } from "@/constants";
+
+type FormInput = Omit<ReportInput, "imageUrl"> & { image?: File };
 
 export function ReportSubmitForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,48 +24,70 @@ export function ReportSubmitForm() {
     register,
     handleSubmit,
     control,
-    setValue,
     formState: { errors },
-  } = useForm<ReportInput>({
-    resolver: zodResolver(reportSchema),
+  } = useForm<FormInput>({
+    resolver: async (values) => {
+      const errs: Record<string, { type: string; message: string }> = {};
+
+      // Image is now optional, so no mandatory check here
+
+      // Validate other fields via Zod (skip imageUrl since we haven't uploaded yet)
+      if (!values.description || values.description.length < 10) {
+        errs.description = { type: "minLength", message: "Deskripsi minimal 10 karakter" };
+      }
+
+      if (!values.location?.name || values.location.name.length < 1) {
+        errs["location.name"] = { type: "required", message: "Nama lokasi wajib diisi" };
+        errs.location = { type: "required", message: "Lokasi wajib diisi" };
+      }
+
+      return {
+        values: Object.keys(errs).length === 0 ? values : {},
+        errors: errs,
+      };
+    },
   });
 
-  const onSubmit = async (data: ReportInput) => {
+  const onSubmit = async (data: FormInput) => {
     setIsSubmitting(true);
     setSubmitError(null);
 
     try {
-      // 1. Upload Image to Blob
-      const formData = new FormData();
-      formData.append("file", data.image);
+      let imageUrl: string | undefined = undefined;
 
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      // 1. Upload Image to Blob if exist
+      if (data.image) {
+        const formData = new FormData();
+        formData.append("file", data.image);
 
-      if (!uploadRes.ok) throw new Error("Gagal mengunggah gambar");
-      const { url: imageUrl } = await uploadRes.json();
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadRes.ok) throw new Error("Gagal mengunggah gambar");
+        const uploadData = await uploadRes.json();
+        imageUrl = uploadData.url;
+      }
 
       // 2. Submit to Server Action (which writes to Firestore)
-      // For now we assume we have an action submitReport
-      const res = await fetch("/api/reports", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...data,
-          imageUrl,
-          image: undefined, // remove file from payload
-        }),
+      const res = await submitReport({
+        ...data,
+        imageUrl,
+        image: undefined, // remove file from payload
       });
 
-      if (!res.ok) throw new Error("Gagal mengirim laporan");
+      if (!res.success) throw new Error("Gagal mengirim laporan");
 
       router.push(ROUTES.DASHBOARD_REPORTS);
       router.refresh();
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setSubmitError(err.message || "Terjadi kesalahan saat mengirim laporan.");
+      if (err instanceof Error) {
+        setSubmitError(err.message || "Terjadi kesalahan saat mengirim laporan.");
+      } else {
+        setSubmitError("Terjadi kesalahan sistem saat mengirim laporan.");
+      }
     } finally {
       setIsSubmitting(false);
     }

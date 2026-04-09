@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { loginSchema, LoginInput } from "@/lib/validations/auth";
@@ -11,6 +11,18 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { ROUTES } from "@/constants";
+
+/** Determine the correct landing page based on user role */
+function getRedirectPath(role?: string): string {
+  switch (role) {
+    case "superadmin":
+      return "/superadmin";
+    case "admin":
+      return "/admin";
+    default:
+      return ROUTES.DASHBOARD;
+  }
+}
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +50,10 @@ export default function LoginPage() {
       if (res?.error) {
         setError("Email atau password salah");
       } else {
-        router.push(ROUTES.DASHBOARD);
+        // Fetch fresh session to get role, then redirect accordingly
+        const session = await getSession();
+        const redirectPath = getRedirectPath(session?.user?.role);
+        router.push(redirectPath);
         router.refresh();
       }
     } catch (err) {

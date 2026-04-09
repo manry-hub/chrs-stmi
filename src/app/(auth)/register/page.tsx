@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { ROUTES } from "@/constants";
-import { registerUser } from "@/actions/authActions";
+import { registerUser } from "@/actions/auth/registerUser";
 
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
@@ -30,13 +30,15 @@ export default function RegisterPage() {
     setError(null);
     try {
       const res = await registerUser(data);
-      if (!res.success) {
-        setError(res.error || "Gagal mendaftar");
-      } else {
+      if (res.success) {
         router.push(ROUTES.LOGIN);
       }
     } catch (err) {
-      setError("Terjadi kesalahan sistem");
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Terjadi kesalahan sistem");
+      }
     } finally {
       setIsLoading(false);
     }
