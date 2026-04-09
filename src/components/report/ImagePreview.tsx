@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ImagePlus, X, Camera, ImageIcon } from "lucide-react";
 import { Button } from "../ui/Button";
+import imageCompression from "browser-image-compression";
 
 interface ImagePreviewProps {
     onImageSelected: (file: File | null) => void;
@@ -10,15 +11,35 @@ interface ImagePreviewProps {
 export function ImagePreview({ onImageSelected, error }: ImagePreviewProps) {
     const [preview, setPreview] = useState<string | null>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-                alert("Ukuran file maksimal 5MB");
-                return;
-            }
-            setPreview(URL.createObjectURL(file));
-            onImageSelected(file);
+        if (!file) return;
+
+        // Validasi tipe
+        if (!file.type.startsWith("image/")) {
+            alert("File harus berupa gambar");
+            return;
+        }
+
+        // 🔥 Compress options
+        const options = {
+            maxSizeMB: 1,
+            maxWidthOrHeight: 1280,
+            useWebWorker: true,
+            fileType: "image/webp",
+        };
+
+        try {
+            const compressedFile = await imageCompression(file, options);
+
+            console.log("Original:", file.size / 1024 / 1024, "MB");
+            console.log("Compressed:", compressedFile.size / 1024 / 1024, "MB");
+
+            setPreview(URL.createObjectURL(compressedFile));
+            onImageSelected(compressedFile);
+        } catch (error) {
+            console.error("Compression error:", error);
+            alert("Gagal memproses gambar");
         }
     };
 
