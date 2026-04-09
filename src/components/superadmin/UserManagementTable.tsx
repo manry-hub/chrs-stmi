@@ -101,7 +101,7 @@ export function UserManagementTable({ users: initialUsers }: UserManagementTable
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleEdit(user)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                           Edit
@@ -109,7 +109,7 @@ export function UserManagementTable({ users: initialUsers }: UserManagementTable
                         <button
                           onClick={() => setDeleteTarget(user)}
                           disabled={isPending}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-medium transition-colors disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition-all duration-200 disabled:opacity-50 hover:scale-[1.05] active:scale-[0.95]"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                           Hapus

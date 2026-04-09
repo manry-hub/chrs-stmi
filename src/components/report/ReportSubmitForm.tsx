@@ -12,6 +12,7 @@ import { Label } from "../ui/Label";
 import { ImagePreview } from "./ImagePreview";
 import { LocationPicker } from "./LocationPicker";
 import { ROUTES } from "@/constants";
+import toast from "react-hot-toast";
 
 type FormInput = Omit<ReportInput, "imageUrl"> & { image?: File };
 
@@ -79,15 +80,14 @@ export function ReportSubmitForm() {
 
       if (!res.success) throw new Error("Gagal mengirim laporan");
 
+      toast.success("Laporan berhasil dikirim!");
       router.push(ROUTES.DASHBOARD_REPORTS);
       router.refresh();
     } catch (err) {
       console.error(err);
-      if (err instanceof Error) {
-        setSubmitError(err.message || "Terjadi kesalahan saat mengirim laporan.");
-      } else {
-        setSubmitError("Terjadi kesalahan sistem saat mengirim laporan.");
-      }
+      const msg = err instanceof Error ? err.message : "Terjadi kesalahan sistem.";
+      setSubmitError(msg);
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }

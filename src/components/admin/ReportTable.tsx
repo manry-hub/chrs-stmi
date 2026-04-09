@@ -105,7 +105,7 @@ export function ReportTable({ reports, baseUrl = "/admin/reports", allowDelete =
                                         <div className="flex items-center justify-end gap-2">
                                             <Link
                                                 href={`${baseUrl}/${report.id}`}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-medium transition-colors duration-200"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                                             >
                                                 <Eye className="w-3.5 h-3.5" />
                                                 Detail
