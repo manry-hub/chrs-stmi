@@ -2,10 +2,9 @@ import { adminDb } from "@/lib/firebase/admin";
 import { ReportDocument, ReportLogDocument } from "@/types";
 import { notFound } from "next/navigation";
 import { ReportStatusBadge } from "@/components/report/ReportStatusBadge";
-import { MapPin, User, Calendar, MessageSquare, ArrowLeft } from "lucide-react";
+import { MapPin, User, Calendar, MessageSquare, ArrowLeft, Home } from "lucide-react";
 import Link from "next/link";
 import { ROUTES } from "@/constants";
-import * as admin from "firebase-admin";
 
 export const revalidate = 0;
 
@@ -49,13 +48,20 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
     return (
         <div className="min-h-screen bg-slate-50 py-10">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                <Link
-                    href={ROUTES.REPORTS}
-                    className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 mb-6 transition-colors"
-                >
-                    <ArrowLeft className="w-4 h-4" />
-                    Kembali ke Daftar
-                </Link>
+                <div className="flex flex-wrap items-center gap-4 mb-6">
+                    <Link href={ROUTES.HOME} className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors">
+                        <Home className="w-4 h-4" />
+                        Home
+                    </Link>
+                    <span className="text-slate-300">/</span>
+                    <Link
+                        href={ROUTES.REPORTS}
+                        className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Kembali ke Daftar
+                    </Link>
+                </div>
 
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div className="aspect-video w-full bg-slate-100">

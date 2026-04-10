@@ -28,8 +28,8 @@ export default async function HomePage() {
                 </h1>
 
                 <p className="text-base sm:text-lg md:text-xl text-white font-medium mb-8 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2 drop-shadow-sm">
-                    Sistem pelaporan kondisi bahaya (hazard) real-time untuk Civitas Akademika. Laporkan segera potensi kerusakan agar lingkungan
-                    kampus tetap aman dan nyaman.
+                    Sistem pelaporan kondisi bahaya secara real-time untuk Civitas Akademika. Laporkan segera potensi kerusakan agar lingkungan kampus
+                    tetap aman dan nyaman.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-sm sm:max-w-none mx-auto">

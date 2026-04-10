@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { MapPin } from "lucide-react";
 import { Button } from "../ui/Button";
-import { Input } from "../ui/Input";
+import { Select } from "../ui/Select";
 import { Label } from "../ui/Label";
+import { CAMPUS_LOCATIONS } from "@/constants";
 
 interface LocationPickerProps {
     onLocationChange: (location: { name: string; lat: number; lng: number }) => void;
@@ -61,7 +62,7 @@ export function LocationPicker({ onLocationChange, error, nameError }: LocationP
         }
     };
 
-    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleNameChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newName = e.target.value;
         setName(newName);
         if (coords) {
@@ -75,14 +76,14 @@ export function LocationPicker({ onLocationChange, error, nameError }: LocationP
     return (
         <div className="space-y-3">
             <div>
-                <Label htmlFor="locationName">Nama/Detail Lokasi</Label>
+                <Label htmlFor="locationName">Pilih Nama Lokasi - Penanggung Jawab</Label>
                 <div className="flex gap-2 mt-1">
-                    <Input
+                    <Select
                         id="locationName"
-                        placeholder="Contoh: Gedung A Lantai 2"
+                        options={CAMPUS_LOCATIONS}
                         value={name}
                         onChange={handleNameChange}
-                        className={nameError ? "border-red-500" : ""}
+                        error={nameError}
                     />
                     <Button
                         type="button"

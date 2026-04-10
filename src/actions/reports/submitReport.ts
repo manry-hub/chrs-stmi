@@ -5,6 +5,8 @@ import { adminDb } from "@/lib/firebase/admin";
 import { submitReportSchema } from "@/lib/validations/report";
 import { FieldValue } from "firebase-admin/firestore";
 
+import { sendPushToAdmins } from "@/lib/notifications/sendPushToAdmins";
+
 export async function submitReport(formData: unknown) {
   const session = await auth();
   if (!session || session.user.role !== "user") {
@@ -36,6 +38,13 @@ export async function submitReport(formData: unknown) {
     note: "Laporan dibuat oleh user",
     createdAt: FieldValue.serverTimestamp(),
   });
+
+  // Send push notification to all admins (fire and forget)
+  sendPushToAdmins({
+    title: "Laporan Bahaya Baru!",
+    body: `${session.user.name || "Seorang user"} baru saja melaporkan bahaya di ${data.location.name}.`,
+    url: "/superadmin/reports", // Or /admin depending on which one the admin uses
+  }).catch(err => console.error("Critical error in report submission push:", err));
 
   return { success: true, reportId: reportRef.id };
 }

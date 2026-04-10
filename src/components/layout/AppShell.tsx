@@ -4,20 +4,19 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import Image from "next/image";
+import { PushNotificationToggle } from "@/components/notifications/PushNotificationToggle";
 import {
     LayoutDashboard,
     BarChart3,
     Users,
     FileText,
     LogOut,
-    Shield,
-    ShieldCheck,
     Menu,
     X,
     PanelLeftClose,
     ClipboardList,
     PlusCircle,
-    UserCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types";
@@ -66,10 +65,11 @@ export function AppShell({ role, userName, children }: AppShellProps) {
 
     // Close sidebar on route change on mobile
     useEffect(() => {
-        if (typeof window !== "undefined" && window.innerWidth < 1024) {
-            setSidebarOpen(false);
+        if (typeof window !== "undefined" && window.innerWidth < 1024 && sidebarOpen) {
+            const timer = setTimeout(() => setSidebarOpen(false), 0);
+            return () => clearTimeout(timer);
         }
-    }, [pathname]);
+    }, [pathname, sidebarOpen]);
 
     // Role-specific styling
     const roleBadgeClass = isSuperadmin
@@ -78,7 +78,6 @@ export function AppShell({ role, userName, children }: AppShellProps) {
         ? "bg-blue-500/20 text-blue-300"
         : "bg-emerald-500/20 text-emerald-300";
 
-    const RoleIcon = isSuperadmin ? ShieldCheck : isAdmin ? Shield : UserCircle;
     const roleLabel = isSuperadmin ? "superadmin" : isAdmin ? "admin" : "user";
 
     return (
@@ -97,8 +96,8 @@ export function AppShell({ role, userName, children }: AppShellProps) {
                 {/* Sidebar Header */}
                 <div className="p-5 border-b border-slate-800 flex justify-between items-center">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0">
-                            <img src="logostmi.png" alt="logostmi" />
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25 shrink-0 overflow-hidden">
+                            <Image src="/logostmi.png" alt="logostmi" width={40} height={40} className="object-cover" />
                         </div>
                         <div className="min-w-0">
                             <h2 className="text-sm font-bold tracking-wide truncate">HazardReport</h2>
@@ -211,6 +210,7 @@ export function AppShell({ role, userName, children }: AppShellProps) {
 
                         {/* Right side: user name + role badge */}
                         <div className="flex items-center gap-3">
+                            {(isAdmin || isSuperadmin) && <PushNotificationToggle />}
                             <span
                                 className={cn(
                                     "text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full",

@@ -18,7 +18,7 @@ export default async function DashboardReportsPage() {
           Riwayat Laporan Saya
         </h1>
         <p className="text-sm text-slate-500 mt-1">
-          Pantau status laporan hazard yang pernah Anda ajukan secara real-time.
+          Pantau status laporan sumber potensi bahaya yang pernah Anda ajukan secara real-time.
         </p>
       </div>
 
