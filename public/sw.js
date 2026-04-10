@@ -1,17 +1,30 @@
 self.addEventListener('push', function (event) {
-  if (event.data) {
-    const data = event.data.json();
-    const options = {
-      body: data.body,
-      icon: data.icon || '/icon-192x192.png',
-      badge: '/badge-72x72.png',
-      data: {
-        url: data.url || '/admin',
-      },
-    };
+  let data = {
+    title: 'Notifikasi HazardReport',
+    body: 'Ada informasi baru untuk Anda.',
+    icon: '/icon-192x192.png',
+  };
 
-    event.waitUntil(self.registration.showNotification(data.title, options));
+  if (event.data) {
+    try {
+      data = event.data.json();
+    } catch {
+      console.warn('Push event data is not JSON, using text content if available.');
+      data.body = event.data.text() || data.body;
+    }
   }
+
+  const options = {
+    body: data.body,
+    icon: data.icon || '/icon-192x192.png',
+    badge: '/badge-72x72.png',
+    vibrate: [100, 50, 100],
+    data: {
+      url: data.url || '/admin',
+    },
+  };
+
+  event.waitUntil(self.registration.showNotification(data.title || 'HazardReport', options));
 });
 
 self.addEventListener('notificationclick', function (event) {

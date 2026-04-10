@@ -15,7 +15,10 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 
 export async function sendPushToAdmins(payload: { title: string; body: string; url?: string }) {
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-    console.warn('VAPID keys not set. Skipping push notification.');
+    console.error('❌ PENTING: VAPID Keys belum diset! Notifikasi tidak dikirim.');
+    console.error('Langkah perbaikan:');
+    console.error('1. Jalankan `npx web-push generate-vapid-keys`');
+    console.error('2. Tambahkan `NEXT_PUBLIC_VAPID_PUBLIC_KEY` dan `VAPID_PRIVATE_KEY` ke .env.local');
     return;
   }
 
