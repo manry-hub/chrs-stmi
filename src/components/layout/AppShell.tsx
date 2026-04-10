@@ -65,11 +65,11 @@ export function AppShell({ role, userName, children }: AppShellProps) {
 
     // Close sidebar on route change on mobile
     useEffect(() => {
-        if (typeof window !== "undefined" && window.innerWidth < 1024 && sidebarOpen) {
+        if (typeof window !== "undefined" && window.innerWidth < 1024) {
             const timer = setTimeout(() => setSidebarOpen(false), 0);
             return () => clearTimeout(timer);
         }
-    }, [pathname, sidebarOpen]);
+    }, [pathname]);
 
     // Role-specific styling
     const roleBadgeClass = isSuperadmin
