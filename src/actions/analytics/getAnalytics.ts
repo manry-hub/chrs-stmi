@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { adminDb } from "@/lib/firebase/admin";
+import { HAZARD_TYPES } from "@/constants";
 
 export async function getAnalytics() {
   const session = await auth();
@@ -13,6 +14,24 @@ export async function getAnalytics() {
   const total = reports.length;
   const pending = reports.filter((r) => r.status === "pending").length;
   const confirmed = reports.filter((r) => r.status === "confirmed").length;
+
+  const sourceCounts: Record<string, number> = {};
+  reports.forEach((r) => {
+    if (r.description) {
+      sourceCounts[r.description] = (sourceCounts[r.description] || 0) + 1;
+    }
+  });
+
+  const topSources = Object.entries(sourceCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([value, count]) => {
+      const hazard = HAZARD_TYPES.find((h) => h.value === value);
+      return {
+        name: hazard ? hazard.label : value,
+        count,
+      };
+    });
 
   // Average response time: createdAt → first "confirmed" log
   const responseTimes: number[] = [];
@@ -42,5 +61,5 @@ export async function getAnalytics() {
       ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
       : null;
 
-  return { total, pending, confirmed, avgResponseMinutes };
+  return { total, pending, confirmed, avgResponseMinutes, topSources };
 }
