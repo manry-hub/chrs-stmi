@@ -6,13 +6,15 @@ interface SuperadminChartsProps {
     total: number;
     pending: number;
     confirmed: number;
+    done: number;
     topSources: { name: string; count: number }[];
 }
 
-export function SuperadminCharts({ total, pending, confirmed, topSources }: SuperadminChartsProps) {
+export function SuperadminCharts({ total, pending, confirmed, done, topSources }: SuperadminChartsProps) {
     const pieData = [
         { name: "Pending", value: pending, color: "#d97706" }, // amber-600
-        { name: "Dikonfirmasi", value: confirmed, color: "#059669" }, // emerald-600
+        { name: "Dikonfirmasi", value: confirmed, color: "#16a34a" }, // green-600
+        { name: "Selesai", value: done, color: "#9333ea" }, // purple-600
     ];
 
     const colors = ["#ef4444", "#f97316", "#eab308"]; // red-500, orange-500, yellow-500

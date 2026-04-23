@@ -1,6 +1,7 @@
 export const REPORT_STATUS = {
     PENDING: "pending",
     CONFIRMED: "confirmed",
+    DONE: "done",
 } as const;
 
 export const USER_ROLES = {

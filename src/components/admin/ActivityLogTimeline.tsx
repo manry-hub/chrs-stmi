@@ -29,6 +29,11 @@ const ACTION_CONFIG: Record<string, { icon: typeof CheckCircle2; color: string; 
     color: "text-green-500 bg-green-100",
     label: "Laporan dikonfirmasi",
   },
+  done: {
+    icon: CheckCircle2,
+    color: "text-purple-500 bg-purple-100",
+    label: "Laporan diselesaikan",
+  },
 };
 
 export function ActivityLogTimeline({ logs }: ActivityLogTimelineProps) {

@@ -28,6 +28,7 @@ export interface ReportDocument {
   location: ReportLocation;
   additionalMessage?: string;
   status: ReportStatus;
+  proofImageUrl?: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

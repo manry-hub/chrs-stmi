@@ -11,6 +11,10 @@ const STATUS_CONFIG: Record<ReportStatus, { label: string; className: string }> 
     label: "Dikonfirmasi",
     className: "bg-green-100 text-green-800",
   },
+  [REPORT_STATUS.DONE]: {
+    label: "Selesai",
+    className: "bg-purple-100 text-purple-800",
+  },
 };
 
 export function ReportStatusBadge({ status }: { status: ReportStatus }) {

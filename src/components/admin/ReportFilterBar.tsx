@@ -12,6 +12,7 @@ const FILTERS: { value: ReportStatus | "all"; label: string }[] = [
   { value: "all", label: "Semua" },
   { value: "pending", label: "Belum Dikonfirmasi" },
   { value: "confirmed", label: "Dikonfirmasi" },
+  { value: "done", label: "Selesai" },
 ];
 
 export function ReportFilterBar({ value, onChange }: ReportFilterBarProps) {

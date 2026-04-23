@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { subscribeToReportLogs } from "@/lib/firebase/reports";
 import { confirmReport } from "@/actions/reports/confirmReport";
+import { markReportDone } from "@/actions/reports/markReportDone";
 import { ActivityLogTimeline } from "@/components/admin/ActivityLogTimeline";
 import { ReportStatusBadge } from "@/components/report/ReportStatusBadge";
+import { ImagePreview } from "@/components/report/ImagePreview";
 import { Button } from "@/components/ui/Button";
 import type { ReportDocument, ReportLogDocument } from "@/types";
 import toast from "react-hot-toast";
@@ -32,6 +33,8 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
     const [logs, setLogs] = useState<ReportLogDocument[]>([]);
     const [loading, setLoading] = useState(false);
     const [currentStatus, setCurrentStatus] = useState(report.status);
+    const [proofImage, setProofImage] = useState<File | undefined>();
+    const [proofImageUrl, setProofImageUrl] = useState<string | undefined>(report.proofImageUrl);
 
     useEffect(() => {
         const unsub = subscribeToReportLogs(report.id, setLogs);
@@ -46,6 +49,38 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
             toast.success("Laporan berhasil dikonfirmasi");
         } catch (err) {
             const errMessage = err instanceof Error ? err.message : "Gagal mengkonfirmasi laporan";
+            toast.error(errMessage);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleDone() {
+        if (!proofImage) {
+            toast.error("Silakan unggah foto bukti penyelesaian");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const formData = new FormData();
+            formData.append("file", proofImage);
+
+            const uploadRes = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!uploadRes.ok) throw new Error("Gagal mengunggah foto bukti");
+            const uploadData = await uploadRes.json();
+            const uploadedUrl = uploadData.url;
+
+            await markReportDone({ reportId: report.id, proofImageUrl: uploadedUrl, note: "Tindak lanjut laporan telah diselesaikan" });
+            setCurrentStatus("done");
+            setProofImageUrl(uploadedUrl);
+            toast.success("Laporan berhasil ditandai selesai");
+        } catch (err) {
+            const errMessage = err instanceof Error ? err.message : "Gagal menyelesaikan laporan";
             toast.error(errMessage);
         } finally {
             setLoading(false);
@@ -151,12 +186,42 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
                     </div>
                 )}
 
+                {/* Proof Image / Upload Section */}
+                {(currentStatus === "confirmed" || (currentStatus === "done" && proofImageUrl)) && (
+                    <div className="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <p className="text-sm font-semibold text-slate-800 mb-4">Bukti Penyelesaian</p>
+                        
+                        {currentStatus === "confirmed" ? (
+                            <ImagePreview onImageSelected={(file) => setProofImage(file || undefined)} />
+                        ) : (
+                            <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+                                <img
+                                    src={proofImageUrl || "https://via.placeholder.com/1200x600?text=No+Image"}
+                                    alt="Foto Bukti Penyelesaian"
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                />
+                            </div>
+                        )}
+                    </div>
+                )}
+
                 {/* Confirm Button */}
                 {currentStatus === "pending" && (
                     <div className="mt-6 pt-4 border-t border-slate-200">
                         <Button onClick={handleConfirm} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white gap-2">
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                             {loading ? "Mengkonfirmasi..." : "Konfirmasi Laporan"}
+                        </Button>
+                    </div>
+                )}
+
+                {/* Complete Button */}
+                {currentStatus === "confirmed" && (
+                    <div className="mt-6 pt-4 border-t border-slate-200">
+                        <Button onClick={handleDone} disabled={loading} className="bg-purple-600 hover:bg-purple-700 text-white gap-2">
+                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                            {loading ? "Menyelesaikan..." : "Selesaikan Laporan"}
                         </Button>
                     </div>
                 )}

@@ -113,6 +113,19 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
                             )}
                         </div>
 
+                        {report.status === "done" && report.proofImageUrl && (
+                            <div className="mb-8">
+                                <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Bukti Penyelesaian</h3>
+                                <div className="aspect-video w-full max-w-2xl bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
+                                    <img
+                                        src={report.proofImageUrl}
+                                        alt="Foto Bukti Penyelesaian Tindak Lanjut"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         {logs.length > 0 && (
                             <div>
                                 <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Log Riwayat Status</h3>

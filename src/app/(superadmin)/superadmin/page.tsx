@@ -4,7 +4,7 @@ import { FileCheck, AlertTriangle } from "lucide-react";
 import { SuperadminCharts } from "@/components/superadmin/SuperadminCharts";
 
 export default async function SuperadminDashboard() {
-  const { total, pending, confirmed, avgResponseMinutes, topSources } = await getAnalytics();
+  const { total, pending, confirmed, done, avgResponseMinutes, topSources } = await getAnalytics();
 
   return (
     <div className="space-y-6">
@@ -21,6 +21,7 @@ export default async function SuperadminDashboard() {
         <StatsCard label="Total Laporan" value={total} color="blue" />
         <StatsCard label="Belum Dikonfirmasi" value={pending} color="yellow" />
         <StatsCard label="Dikonfirmasi" value={confirmed} color="green" />
+        <StatsCard label="Selesai" value={done} color="purple" />
         <StatsCard
           label="Rata-rata Respons"
           value={
@@ -86,7 +87,7 @@ export default async function SuperadminDashboard() {
       </div>
 
       {/* Charts Section */}
-      <SuperadminCharts total={total} pending={pending} confirmed={confirmed} topSources={topSources} />
+      <SuperadminCharts total={total} pending={pending} confirmed={confirmed} done={done} topSources={topSources} />
     </div>
   );
 }

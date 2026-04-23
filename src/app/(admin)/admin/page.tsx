@@ -28,10 +28,12 @@ export default function AdminDashboard() {
   const totalReports = reports.length;
   const pendingCount = reports.filter((r) => r.status === "pending").length;
   const confirmedCount = reports.filter((r) => r.status === "confirmed").length;
+  const doneCount = reports.filter((r) => r.status === "done").length;
 
   const pieData = [
     { name: "Pending", value: pendingCount, color: "#d97706" }, // amber-600
-    { name: "Dikonfirmasi", value: confirmedCount, color: "#059669" }, // emerald-600
+    { name: "Dikonfirmasi", value: confirmedCount, color: "#16a34a" }, // green-600
+    { name: "Selesai", value: doneCount, color: "#9333ea" }, // purple-600
   ];
 
   return (
@@ -59,6 +61,10 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-xl border border-emerald-200 p-4 shadow-sm flex-1">
             <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Dikonfirmasi</p>
             <p className="text-2xl font-bold text-emerald-700 mt-1">{confirmedCount}</p>
+          </div>
+          <div className="bg-white rounded-xl border border-purple-200 p-4 shadow-sm flex-1">
+            <p className="text-xs font-semibold text-purple-600 uppercase tracking-wide">Selesai</p>
+            <p className="text-2xl font-bold text-purple-700 mt-1">{doneCount}</p>
           </div>
         </div>
 

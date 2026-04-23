@@ -25,6 +25,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     location: data?.location ?? { name: "", lat: 0, lng: 0 },
     additionalMessage: data?.additionalMessage,
     status: data?.status ?? "pending",
+    proofImageUrl: data?.proofImageUrl,
     createdAt: data?.createdAt ? { seconds: data.createdAt.seconds, nanoseconds: data.createdAt.nanoseconds } : { seconds: 0, nanoseconds: 0 },
     updatedAt: data?.updatedAt ? { seconds: data.updatedAt.seconds, nanoseconds: data.updatedAt.nanoseconds } : { seconds: 0, nanoseconds: 0 },
   } as ReportDocument;

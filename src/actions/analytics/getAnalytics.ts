@@ -14,6 +14,7 @@ export async function getAnalytics() {
   const total = reports.length;
   const pending = reports.filter((r) => r.status === "pending").length;
   const confirmed = reports.filter((r) => r.status === "confirmed").length;
+  const done = reports.filter((r) => r.status === "done").length;
 
   const sourceCounts: Record<string, number> = {};
   reports.forEach((r) => {
@@ -34,10 +35,12 @@ export async function getAnalytics() {
     });
 
   // Average response time: createdAt → first "confirmed" log
+  // Average response time logic relies on 'confirmed' or 'done' since 'done' implies it was confirmed previously
+  // Wait, the rule is to fetch logs where action == "confirmed". That's fine.
   const responseTimes: number[] = [];
 
   for (const doc of reportsSnap.docs) {
-    if (doc.data().status !== "confirmed") continue;
+    if (doc.data().status !== "confirmed" && doc.data().status !== "done") continue;
     const logsSnap = await adminDb
       .collection("reports")
       .doc(doc.id)
@@ -61,5 +64,5 @@ export async function getAnalytics() {
       ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
       : null;
 
-  return { total, pending, confirmed, avgResponseMinutes, topSources };
+  return { total, pending, confirmed, done, avgResponseMinutes, topSources };
 }
