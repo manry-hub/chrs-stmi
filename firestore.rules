@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function getRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isAuth() && getRole() in ['admin', 'superadmin'];
+    }
+
+    function isSuperAdmin() {
+      return isAuth() && getRole() == 'superadmin';
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isAuth() && (request.auth.uid == userId || isAdmin());
+      allow create: if isAuth() && request.auth.uid == userId;
+      allow update: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    // Reports collection
+    match /reports/{reportId} {
+      allow read: if true; // Public read
+      allow create: if isAuth() && getRole() == 'user';
+      allow update: if isAdmin(); // Only admin/superadmin can update status
+
+      // Logs subcollection
+      match /logs/{logId} {
+        allow read: if isAuth();
+        allow write: if false; // Only via Admin SDK (server-side)
+      }
+    }
+  }
+}
