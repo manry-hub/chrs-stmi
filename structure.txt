@@ -1,0 +1,134 @@
+.
+├── AGENTS.md
+├── CLAUDE.md
+├── eslint.config.mjs
+├── firestore.indexes.json
+├── firestore.rules
+├── next.config.ts
+├── next-env.d.ts
+├── package.json
+├── package-lock.json
+├── postcss.config.mjs
+├── public
+│   ├── background.webp
+│   ├── badge-72x72.png
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── icon-192x192.png
+│   ├── icon-512x512.png
+│   ├── logostmi.png
+│   ├── next.svg
+│   ├── sw.js
+│   ├── vercel.svg
+│   └── window.svg
+├── README.md
+├── scripts
+│   └── seed-admin.ts
+├── src
+│   ├── actions
+│   │   ├── analytics
+│   │   │   └── getAnalytics.ts
+│   │   ├── auth
+│   │   │   └── registerUser.ts
+│   │   ├── notifications
+│   │   │   ├── subscribeNotification.ts
+│   │   │   └── unsubscribeNotification.ts
+│   │   ├── reports
+│   │   │   ├── confirmReport.ts
+│   │   │   ├── deleteReport.ts
+│   │   │   ├── markReportDone.ts
+│   │   │   └── submitReport.ts
+│   │   └── users
+│   │       ├── createUser.ts
+│   │       ├── deleteUser.ts
+│   │       ├── getUsers.ts
+│   │       ├── updateUserRole.ts
+│   │       └── updateUser.ts
+│   ├── app
+│   │   ├── (admin)
+│   │   │   ├── admin
+│   │   │   └── layout.tsx
+│   │   ├── api
+│   │   │   ├── auth
+│   │   │   ├── reports
+│   │   │   └── upload
+│   │   ├── (auth)
+│   │   │   ├── layout.tsx
+│   │   │   ├── login
+│   │   │   └── register
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── manifest.ts
+│   │   ├── page.tsx
+│   │   ├── reports
+│   │   │   ├── page.tsx
+│   │   │   └── [reportId]
+│   │   ├── (superadmin)
+│   │   │   ├── layout.tsx
+│   │   │   └── superadmin
+│   │   └── (user)
+│   │       ├── dashboard
+│   │       └── layout.tsx
+│   ├── components
+│   │   ├── admin
+│   │   │   ├── ActivityLogTimeline.tsx
+│   │   │   ├── AdminSidebar.tsx
+│   │   │   ├── ReportDetailClient.tsx
+│   │   │   ├── ReportFilterBar.tsx
+│   │   │   └── ReportTable.tsx
+│   │   ├── layout
+│   │   │   └── AppShell.tsx
+│   │   ├── notifications
+│   │   │   └── PushNotificationToggle.tsx
+│   │   ├── providers
+│   │   │   └── ToastProvider.tsx
+│   │   ├── pwa
+│   │   │   └── ServiceWorkerRegister.tsx
+│   │   ├── report
+│   │   │   ├── ImagePreview.tsx
+│   │   │   ├── LocationPicker.tsx
+│   │   │   ├── ReportCard.tsx
+│   │   │   ├── ReportStatusBadge.tsx
+│   │   │   ├── ReportSubmitForm.tsx
+│   │   │   └── UserReportList.tsx
+│   │   ├── superadmin
+│   │   │   ├── StatsCard.tsx
+│   │   │   ├── SuperadminCharts.tsx
+│   │   │   ├── UserManagementTable.tsx
+│   │   │   └── UserModal.tsx
+│   │   └── ui
+│   │       ├── Button.tsx
+│   │       ├── ConfirmDialog.tsx
+│   │       ├── EmergencyCallButton.tsx
+│   │       ├── Input.tsx
+│   │       ├── Label.tsx
+│   │       ├── LogoutButton.tsx
+│   │       ├── Select.tsx
+│   │       └── Textarea.tsx
+│   ├── constants
+│   │   └── index.ts
+│   ├── hooks
+│   │   └── useUserReports.ts
+│   ├── lib
+│   │   ├── auth
+│   │   │   └── index.ts
+│   │   ├── firebase
+│   │   │   ├── admin.ts
+│   │   │   ├── client.ts
+│   │   │   └── reports.ts
+│   │   ├── notifications
+│   │   │   └── sendPushToAdmins.ts
+│   │   ├── utils.ts
+│   │   └── validations
+│   │       ├── auth.ts
+│   │       ├── report.ts
+│   │       └── user.ts
+│   └── types
+│       ├── index.ts
+│       └── next-auth.d.ts
+├── structure.txt
+├── tsconfig.json
+└── tsconfig.tsbuildinfo
+
+43 directories, 89 files
