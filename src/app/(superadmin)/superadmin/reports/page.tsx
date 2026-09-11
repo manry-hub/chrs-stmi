@@ -11,12 +11,20 @@ export default function SuperadminReportsPage() {
     const [reports, setReports] = useState<ReportDocument[]>([]);
     const [filter, setFilter] = useState<ReportStatus | "all">("all");
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const unsub = subscribeToAllReportsAdmin((data) => {
-            setReports(data);
-            setLoading(false);
-        });
+        const unsub = subscribeToAllReportsAdmin(
+            (data) => {
+                setReports(data);
+                setLoading(false);
+            },
+            (err) => {
+                console.error("Firestore Error:", err);
+                setError(err.message);
+                setLoading(false);
+            }
+        );
         return unsub;
     }, []);
 
@@ -37,6 +45,14 @@ export default function SuperadminReportsPage() {
             {loading ? (
                 <div className="flex items-center justify-center py-20">
                     <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                </div>
+            ) : error ? (
+                <div className="p-4 bg-red-50 text-red-600 rounded-xl border border-red-200">
+                    <p className="font-semibold mb-1">Gagal memuat laporan:</p>
+                    <p className="text-sm">{error}</p>
+                    <p className="text-xs mt-2 italic">
+                        Jika ini error index, klik link pada console browser (F12) untuk membuatnya.
+                    </p>
                 </div>
             ) : (
                 <ReportTable reports={filtered} baseUrl="/admin/reports" allowDelete={true} />

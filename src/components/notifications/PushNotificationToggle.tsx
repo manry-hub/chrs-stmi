@@ -31,11 +31,13 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export function PushNotificationToggle() {
+  const [mounted, setMounted] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if ("serviceWorker" in navigator && "PushManager" in window) {
+    setMounted(true);
+    if (typeof window !== "undefined" && "serviceWorker" in window.navigator && "PushManager" in window) {
       checkSubscription();
     } else {
       setLoading(false);
@@ -107,7 +109,18 @@ export function PushNotificationToggle() {
     }
   }
 
-  if (!("serviceWorker" in navigator && "PushManager" in window)) {
+  if (!mounted) {
+    return (
+      <button
+        disabled
+        className="relative p-2 rounded-xl transition-all duration-200 bg-slate-100 text-slate-500"
+      >
+        <BellOff className="w-5 h-5" />
+      </button>
+    );
+  }
+
+  if (typeof window === "undefined" || !("serviceWorker" in window.navigator && "PushManager" in window)) {
     return null;
   }
 
