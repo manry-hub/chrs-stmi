@@ -13,6 +13,20 @@ export interface UserDocument {
     createdAt: Timestamp;
 }
 
+export interface LocationDocument {
+    id: string;
+    name: string;
+    adminId: string | null;
+    adminName: string | null;
+    createdAt: Timestamp;
+}
+
+export interface HazardTypeDocument {
+    id: string;
+    name: string;
+    createdAt: Timestamp;
+}
+
 export interface ReportLocation {
     name: string;
     lat: number;
@@ -25,6 +39,8 @@ export interface ReportDocument {
     userName: string;
     imageUrl: string;
     description: string;
+    locationId?: string;       // New field for dynamic location
+    assignedAdminId?: string;  // New field for admin tracking
     location: ReportLocation;
     additionalMessage?: string;
     status: ReportStatus;

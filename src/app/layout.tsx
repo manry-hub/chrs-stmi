@@ -33,6 +33,7 @@ export const viewport = {
 };
 
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import SessionProvider from "@/components/providers/SessionProvider";
 
 export default function RootLayout({
   children,
@@ -45,8 +46,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ServiceWorkerRegister />
-        {children}
+        <SessionProvider>
+          <ServiceWorkerRegister />
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

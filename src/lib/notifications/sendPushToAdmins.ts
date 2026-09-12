@@ -13,7 +13,7 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
   );
 }
 
-export async function sendPushToAdmins(payload: { title: string; body: string; url?: string }) {
+export async function sendPushToAdmins(payload: { title: string; body: string; url?: string }, targetAdminId?: string) {
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
     console.error('❌ PENTING: VAPID Keys belum diset! Notifikasi tidak dikirim.');
     console.error('Langkah perbaikan:');
@@ -23,11 +23,11 @@ export async function sendPushToAdmins(payload: { title: string; body: string; u
   }
 
   try {
-    // Fetch all admin and superadmin subscriptions
-    const snapshot = await adminDb
-      .collection('pushSubscriptions')
-      .where('role', 'in', ['admin', 'superadmin'])
-      .get();
+    let query = adminDb.collection('pushSubscriptions').where('role', 'in', ['admin', 'superadmin']);
+    
+    // If a specific admin is targeted, we could filter it, but firestore 'in' query with another '==' is tricky.
+    // We'll fetch all admin/superadmin and filter in memory since it's a small dataset.
+    const snapshot = await query.get();
 
     if (snapshot.empty) {
       console.log('No admin push subscriptions found.');
@@ -35,7 +35,13 @@ export async function sendPushToAdmins(payload: { title: string; body: string; u
     }
 
     const notifications = snapshot.docs.map(async (doc) => {
-      const subscription = doc.data().subscription;
+      const data = doc.data();
+      // If there's a target admin, only send to that admin AND superadmins
+      if (targetAdminId && data.role === 'admin' && data.userId !== targetAdminId) {
+          return;
+      }
+
+      const subscription = data.subscription;
       try {
         await webpush.sendNotification(
           subscription,

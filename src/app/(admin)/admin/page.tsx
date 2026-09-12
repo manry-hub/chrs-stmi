@@ -8,9 +8,13 @@ import type { ReportDocument, ReportStatus } from "@/types";
 import { Loader2 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
+import { useSession } from "next-auth/react";
+
 export default function AdminDashboard() {
+  const { data: session } = useSession();
   const [reports, setReports] = useState<ReportDocument[]>([]);
   const [filter, setFilter] = useState<ReportStatus | "all">("all");
+  const [viewMode, setViewMode] = useState<"all" | "my-locations">("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,14 +33,18 @@ export default function AdminDashboard() {
     return unsub;
   }, []);
 
+  const baseReports = viewMode === "my-locations" && session?.user?.id
+    ? reports.filter(r => r.assignedAdminId === session.user.id)
+    : reports;
+
   const filtered =
-    filter === "all" ? reports : reports.filter((r) => r.status === filter);
+    filter === "all" ? baseReports : baseReports.filter((r) => r.status === filter);
 
   // Stats
-  const totalReports = reports.length;
-  const pendingCount = reports.filter((r) => r.status === "pending").length;
-  const confirmedCount = reports.filter((r) => r.status === "confirmed").length;
-  const doneCount = reports.filter((r) => r.status === "done").length;
+  const totalReports = baseReports.length;
+  const pendingCount = baseReports.filter((r) => r.status === "pending").length;
+  const confirmedCount = baseReports.filter((r) => r.status === "confirmed").length;
+  const doneCount = baseReports.filter((r) => r.status === "done").length;
 
   const pieData = [
     { name: "Pending", value: pendingCount, color: "#d97706" }, // amber-600
@@ -47,11 +55,27 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard Laporan</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Kelola dan pantau laporan bahaya secara real-time.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Dashboard Laporan</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Kelola dan pantau laporan bahaya secara real-time.
+          </p>
+        </div>
+        <div className="flex bg-slate-100 p-1 rounded-lg">
+            <button
+                onClick={() => setViewMode("all")}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewMode === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            >
+                Semua Laporan
+            </button>
+            <button
+                onClick={() => setViewMode("my-locations")}
+                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewMode === "my-locations" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            >
+                Lokasi Saya
+            </button>
+        </div>
       </div>
 
       {/* Analytics Overview */}

@@ -12,15 +12,25 @@ import { Select } from "../ui/Select";
 import { Label } from "../ui/Label";
 import { ImagePreview } from "./ImagePreview";
 import { LocationPicker } from "./LocationPicker";
-import { ROUTES, HAZARD_TYPES } from "@/constants";
+import { ROUTES } from "@/constants";
 import toast from "react-hot-toast";
+import { LocationDocument, HazardTypeDocument } from "@/types";
+import { isWithinSTMI } from "@/lib/utils/geofence";
 
 type FormInput = Omit<ReportInput, "imageUrl"> & { image?: File };
 
-export function ReportSubmitForm() {
+interface ReportSubmitFormProps {
+    locations?: LocationDocument[];
+    hazardTypes?: HazardTypeDocument[];
+    initialLocationId?: string;
+}
+
+export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLocationId }: ReportSubmitFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const router = useRouter();
+
+    const hazardOptions = hazardTypes.map(h => ({ value: h.name, label: h.name }));
 
     const {
         register,
@@ -31,9 +41,11 @@ export function ReportSubmitForm() {
         resolver: async (values) => {
             const errs: Record<string, { type: string; message: string }> = {};
 
-            // Image is now optional, so no mandatory check here
+            if (!values.image) {
+                errs.image = { type: "required", message: "Foto kejadian wajib diunggah" };
+            }
 
-            // Validate other fields via Zod (skip imageUrl since we haven't uploaded yet)
+            // Validate other fields via Zod
             if (!values.description) {
                 errs.description = { type: "required", message: "Jenis sumber potensi bahaya wajib dipilih" };
             }
@@ -55,9 +67,31 @@ export function ReportSubmitForm() {
         setSubmitError(null);
 
         try {
-            let imageUrl: string | undefined = undefined;
+            // 1. Dapatkan GPS otomatis
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error("Browser Anda tidak mendukung geolokasi."));
+                } else {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0,
+                    });
+                }
+            }).catch(() => {
+                throw new Error("Gagal mendapatkan lokasi. Pastikan GPS aktif dan izin diberikan.");
+            });
 
-            // 1. Upload Image to Blob if exist
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            // 2. Cek Geofence
+            if (!isWithinSTMI(lat, lng)) {
+                throw new Error("Laporan ditolak: Anda berada di luar kawasan Politeknik STMI Jakarta.");
+            }
+
+            // 3. Upload Image
+            let imageUrl: string | undefined = undefined;
             if (data.image) {
                 const formData = new FormData();
                 formData.append("file", data.image);
@@ -72,12 +106,23 @@ export function ReportSubmitForm() {
                 imageUrl = uploadData.url;
             }
 
-            // 2. Submit to Server Action (which writes to Firestore)
-            const res = await submitReport({
+            // 4. Submit to Server Action
+            const locationData = data.location as any;
+            
+            const payload = {
                 ...data,
+                location: {
+                    name: locationData.name,
+                    lat,
+                    lng
+                },
+                locationId: locationData.locationId,
+                assignedAdminId: locationData.assignedAdminId,
                 imageUrl,
                 image: undefined, // remove file from payload
-            });
+            };
+
+            const res = await submitReport(payload);
 
             if (!res.success) throw new Error("Gagal mengirim laporan");
 
@@ -112,7 +157,7 @@ export function ReportSubmitForm() {
                     </Label>
                     <Select
                         id="description"
-                        options={HAZARD_TYPES}
+                        options={hazardOptions}
                         {...register("description")}
                         error={errors.description?.message}
                     />
@@ -134,7 +179,11 @@ export function ReportSubmitForm() {
                         control={control}
                         render={({ field }) => (
                             <LocationPicker
-                                onLocationChange={field.onChange}
+                                locations={locations}
+                                initialLocationId={initialLocationId}
+                                onLocationChange={(locData) => {
+                                    field.onChange(locData);
+                                }}
                                 error={errors.location?.message as string}
                                 nameError={errors.location?.name?.message as string}
                             />

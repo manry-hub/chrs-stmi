@@ -1,114 +1,71 @@
-import React, { useState } from "react";
-import { MapPin } from "lucide-react";
-import { Button } from "../ui/Button";
-import { Select } from "../ui/Select";
+import React, { useState, useEffect } from "react";
 import { Label } from "../ui/Label";
-import { CAMPUS_LOCATIONS } from "@/constants";
+import { LocationDocument } from "@/types";
 
 interface LocationPickerProps {
-    onLocationChange: (location: { name: string; lat: number; lng: number }) => void;
+    onLocationChange: (location: { name: string; locationId?: string; assignedAdminId?: string }) => void;
     error?: string;
     nameError?: string;
+    locations: LocationDocument[];
+    initialLocationId?: string;
 }
 
-export function LocationPicker({ onLocationChange, error, nameError }: LocationPickerProps) {
-    const [name, setName] = useState("");
-    const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+export function LocationPicker({ onLocationChange, error, nameError, locations, initialLocationId }: LocationPickerProps) {
+    const [selectedId, setSelectedId] = useState<string>(initialLocationId || "");
 
-    const getLocation = () => {
-        setIsLoading(true);
-        if ("geolocation" in navigator) {
-            // navigator.geolocation.getCurrentPosition(
-            //   (position) => {
-            //     const newCoords = {
-            //       lat: position.coords.latitude,
-            //       lng: position.coords.longitude,
-            //     };
-            //     setCoords(newCoords);
-            //     onLocationChange({ name, ...newCoords });
-            //     setIsLoading(false);
-            //   },
-            //   (error) => {
-            //     console.error("Error fetching location", error);
-            //     alert("Gagal mendapatkan lokasi. Pastikan izin lokasi diberikan.");
-            //     setIsLoading(false);
-            //   }
-            // );
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const newCoords = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                    };
-                    setCoords(newCoords);
-                    onLocationChange({ name, ...newCoords });
-                    setIsLoading(false);
-                },
-                (error) => {
-                    console.error("Error fetching location", error);
-                    alert("Gagal mendapatkan lokasi. Pastikan izin lokasi diberikan.");
-                    setIsLoading(false);
-                },
-                {
-                    enableHighAccuracy: true, // 🔥 penting
-                    timeout: 10000,
-                    maximumAge: 0,
-                }
-            );
-        } else {
-            alert("Browser Anda tidak mendukung geolokasi.");
-            setIsLoading(false);
+    // Initial load: if initialLocationId is provided, trigger onLocationChange
+    useEffect(() => {
+        if (initialLocationId) {
+            const loc = locations.find(l => l.id === initialLocationId);
+            if (loc) {
+                onLocationChange({
+                    name: loc.name,
+                    locationId: loc.id,
+                    assignedAdminId: loc.adminId || undefined
+                });
+            }
         }
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialLocationId, locations]);
 
-    const handleNameChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const newName = e.target.value;
-        setName(newName);
-        if (coords) {
-            onLocationChange({ name: newName, ...coords });
+    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newId = e.target.value;
+        setSelectedId(newId);
+        
+        const loc = locations.find(l => l.id === newId);
+        if (loc) {
+            onLocationChange({
+                name: loc.name,
+                locationId: loc.id,
+                assignedAdminId: loc.adminId || undefined
+            });
         } else {
-            // Provide default/fallback coordinates if none fetched yet
-            onLocationChange({ name: newName, lat: 0, lng: 0 });
+            onLocationChange({ name: "" });
         }
     };
 
     return (
         <div className="space-y-3">
             <div>
-                <Label htmlFor="locationName">Pilih Nama Lokasi - Penanggung Jawab</Label>
-                <div className="flex gap-2 mt-1">
-                    <Select
+                <Label htmlFor="locationName">Pilih Lokasi Kejadian</Label>
+                <div className="mt-1">
+                    <select
                         id="locationName"
-                        options={CAMPUS_LOCATIONS}
-                        value={name}
-                        onChange={handleNameChange}
-                        error={nameError}
-                    />
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={getLocation}
-                        disabled={isLoading}
-                        className="shrink-0"
-                        title="Dapatkan Koordinat GPS"
+                        value={selectedId}
+                        onChange={handleSelectChange}
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white ${nameError ? "border-red-500" : "border-slate-300"}`}
                     >
-                        <MapPin className={`w-4 h-4 mr-2 ${coords ? "text-green-500" : "text-slate-500"}`} />
-                        {isLoading ? "Mencari..." : "GPS"}
-                    </Button>
+                        <option value="">-- Pilih Lokasi --</option>
+                        {locations.map(loc => (
+                            <option key={loc.id} value={loc.id}>
+                                {loc.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
                 {nameError && <p className="text-red-500 text-xs mt-1">{nameError}</p>}
+                {error && !nameError && <p className="text-red-500 text-xs mt-1">{error}</p>}
             </div>
-
-            {coords && (
-                <div className="text-xs text-green-600 bg-green-50 p-2 rounded border border-green-100 flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    <span>
-                        Koordinat tersimpan: {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
-                    </span>
-                </div>
-            )}
-            {error && !nameError && <p className="text-red-500 text-xs mt-1">{error}</p>}
         </div>
     );
 }
