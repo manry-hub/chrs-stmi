@@ -35,7 +35,7 @@ export async function submitReport(formData: unknown) {
   await reportRef.collection("logs").add({
     action: "created",
     performedBy: session.user.id,
-    note: "Laporan dibuat oleh user",
+    note: `Laporan dibuat oleh ${session.user.name || "user"}`,
     createdAt: FieldValue.serverTimestamp(),
   });
 

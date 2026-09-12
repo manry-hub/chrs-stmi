@@ -41,7 +41,7 @@ export async function confirmReport(input: unknown) {
   await reportRef.collection("logs").add({
     action: "confirmed",
     performedBy: session.user.id,
-    note: note ?? "Status diperbarui oleh admin",
+    note: note ?? `Dikonfirmasi oleh ${session.user.name || "admin"}`,
     createdAt: FieldValue.serverTimestamp(),
   });
 

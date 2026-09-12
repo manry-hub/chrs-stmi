@@ -208,25 +208,7 @@ export function AppShell({ role, userName, children }: AppShellProps) {
                             )}
                         </div>
 
-                        {/* Right side: user name + role badge */}
-                        <div className="flex items-center gap-3">
-                            {(isAdmin || isSuperadmin) && <PushNotificationToggle />}
-                            <span
-                                className={cn(
-                                    "text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full",
-                                    isSuperadmin
-                                        ? "bg-purple-100 text-purple-700"
-                                        : isAdmin
-                                        ? "bg-blue-100 text-blue-700"
-                                        : "bg-emerald-100 text-emerald-700"
-                                )}
-                            >
-                                {roleLabel}
-                            </span>
-                            <div className="hidden sm:block text-right">
-                                <p className="text-sm font-medium text-slate-700 leading-tight">{userName}</p>
-                            </div>
-                        </div>
+                        
                     </div>
                 </header>
 

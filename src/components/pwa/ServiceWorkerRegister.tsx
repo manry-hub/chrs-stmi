@@ -9,7 +9,28 @@ import { useEffect } from "react";
  */
 export function ServiceWorkerRegister() {
   useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            registration.unregister().then((boolean) => {
+              if (boolean) console.log("Service Worker unregistered in development mode.");
+            });
+          }
+        });
+      }
+      if ("caches" in window) {
+        caches.keys().then((names) => {
+          for (const name of names) {
+            caches.delete(name);
+          }
+        });
+      }
+      return;
+    }
+
     if ("serviceWorker" in navigator) {
+
       const registerServiceWorker = async () => {
         try {
           const registration = await navigator.serviceWorker.register("/sw.js", {

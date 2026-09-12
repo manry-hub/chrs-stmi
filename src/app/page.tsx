@@ -58,7 +58,7 @@ export default async function HomePage() {
 
             <div className="mt-12 sm:mt-20 relative z-10">
                 <p className="text-xs sm:text-sm text-white font-bold tracking-widest uppercase bg-white/50 px-4 py-1 rounded-full backdrop-blur-[2px]">
-                    MAHASISWA &bull; DOSEN &bull; STAFF
+                    POLITEKNIK STMI JAKARTA
                 </p>
             </div>
         </div>

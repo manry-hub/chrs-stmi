@@ -39,7 +39,7 @@ export default async function PublicReportsPage() {
                     Kembali ke Home
                 </Link>
                 <div className="text-center max-w-2xl mx-auto mb-12">
-                    <h1 className="text-3xl font-bold text-slate-900 flex items-center justify-center gap-3">Daftar Sumber Potensi Bahaya Kampus</h1>
+                    <h1 className="text-3xl font-bold text-slate-900 flex items-center justify-center gap-3">Daftar Sumber Potensi Bahaya di Politeknik STMI Jakarta</h1>
                     <p className="mt-4 text-slate-500">
                         Berikut adalah daftar laporan sumber potensi bahaya yang telah dikirimkan oleh civitas akademika. Semua laporan bersifat
                         transparan untuk meningkatkan kesadaran bersama.

@@ -19,7 +19,6 @@ export default async function SuperadminDashboard() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard label="Total Laporan" value={total} color="blue" />
-        <StatsCard label="Belum Dikonfirmasi" value={pending} color="yellow" />
         <StatsCard label="Dikonfirmasi" value={confirmed} color="green" />
         <StatsCard label="Selesai" value={done} color="purple" />
         <StatsCard

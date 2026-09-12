@@ -44,7 +44,7 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
     async function handleConfirm() {
         setLoading(true);
         try {
-            await confirmReport({ reportId: report.id, note: "Dikonfirmasi oleh admin" });
+            await confirmReport({ reportId: report.id });
             setCurrentStatus("confirmed");
             toast.success("Laporan berhasil dikonfirmasi");
         } catch (err) {
@@ -75,7 +75,7 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
             const uploadData = await uploadRes.json();
             const uploadedUrl = uploadData.url;
 
-            await markReportDone({ reportId: report.id, proofImageUrl: uploadedUrl, note: "Tindak lanjut laporan telah diselesaikan" });
+            await markReportDone({ reportId: report.id, proofImageUrl: uploadedUrl });
             setCurrentStatus("done");
             setProofImageUrl(uploadedUrl);
             toast.success("Laporan berhasil ditandai selesai");

@@ -43,7 +43,7 @@ export async function markReportDone(input: unknown) {
   await reportRef.collection("logs").add({
     action: "done",
     performedBy: session.user.id,
-    note: note ?? "Tindak lanjut laporan telah diselesaikan",
+    note: note ?? `Tindak lanjut laporan telah diselesaikan oleh ${session.user.name || "admin"}`,
     createdAt: FieldValue.serverTimestamp(),
   });
 
