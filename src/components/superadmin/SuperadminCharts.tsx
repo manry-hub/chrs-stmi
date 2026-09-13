@@ -1,22 +1,23 @@
 "use client";
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell } from "recharts";
+import Link from "next/link";
+import { MapPin, CheckCircle2 } from "lucide-react";
+
+interface PendingReport {
+  id: string;
+  description: string;
+  locationName: string;
+  createdAt: string | null;
+}
 
 interface SuperadminChartsProps {
     total: number;
-    pending: number;
-    confirmed: number;
-    done: number;
+    pendingList: PendingReport[];
     topSources: { name: string; count: number }[];
 }
 
-export function SuperadminCharts({ total, pending, confirmed, done, topSources }: SuperadminChartsProps) {
-    const pieData = [
-        { name: "Pending", value: pending, color: "#d97706" }, // amber-600
-        { name: "Dikonfirmasi", value: confirmed, color: "#16a34a" }, // green-600
-        { name: "Selesai", value: done, color: "#9333ea" }, // purple-600
-    ];
-
+export function SuperadminCharts({ total, pendingList, topSources }: SuperadminChartsProps) {
     const colors = ["#ef4444", "#f97316", "#eab308"]; // red-500, orange-500, yellow-500
     const barData = topSources.map((source, index) => ({
         name: source.name,
@@ -26,25 +27,39 @@ export function SuperadminCharts({ total, pending, confirmed, done, topSources }
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-            {/* Pie Chart */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm min-h-[300px]">
-                <h3 className="text-sm font-semibold text-slate-700 mb-4">Proporsi Status</h3>
-                {total > 0 ? (
-                    <div className="w-full h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                                    {pieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }} />
-                                <Legend verticalAlign="bottom" height={36} />
-                            </PieChart>
-                        </ResponsiveContainer>
+            {/* Pending Reports List */}
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm min-h-[300px] flex flex-col">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-sm font-semibold text-slate-700">Laporan Menunggu Tindakan</h3>
+                    {pendingList.length > 0 && (
+                        <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full">{pendingList.length} terbaru</span>
+                    )}
+                </div>
+                
+                {pendingList.length > 0 ? (
+                    <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+                        {pendingList.map(report => (
+                            <Link href={`/superadmin/reports/${report.id}`} key={report.id} className="block group">
+                                <div className="p-3 rounded-xl border border-slate-100 bg-slate-50 group-hover:bg-amber-50/50 group-hover:border-amber-100 transition-colors">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <p className="text-sm font-semibold text-slate-800 line-clamp-1">{report.description || "Tanpa deskripsi"}</p>
+                                        <span className="text-[10px] text-slate-500 whitespace-nowrap ml-2">
+                                            {report.createdAt ? new Date(report.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : ''}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center text-xs text-slate-500 mt-2">
+                                        <MapPin className="w-3 h-3 mr-1" />
+                                        <span className="truncate">{report.locationName}</span>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
                     </div>
                 ) : (
-                    <div className="w-full h-64 flex items-center justify-center text-slate-400 text-sm">Belum ada data</div>
+                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
+                        <CheckCircle2 className="w-8 h-8 mb-2 opacity-20" />
+                        <span className="text-sm font-medium">Tidak ada laporan menunggu</span>
+                    </div>
                 )}
             </div>
 

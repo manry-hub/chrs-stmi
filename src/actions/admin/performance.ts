@@ -10,6 +10,7 @@ export interface AdminPerformance {
     totalDone: number;
     totalPending: number;
     locations: string[];
+    avgResponseMinutes: number | null;
 }
 
 export async function getAdminPerformance(): Promise<AdminPerformance[]> {
@@ -35,6 +36,7 @@ export async function getAdminPerformance(): Promise<AdminPerformance[]> {
                         totalDone: 0,
                         totalPending: 0,
                         locations: [],
+                        avgResponseMinutes: null,
                     };
                 }
                 adminMap[loc.adminId].locations.push(loc.name);
@@ -43,6 +45,10 @@ export async function getAdminPerformance(): Promise<AdminPerformance[]> {
 
         // 2. Get all reports that have assignedAdminId
         const reportsSnapshot = await adminDb.collection("reports").get();
+        
+        // Prepare to fetch response times
+        const responsePromises: Promise<{ adminId: string; responseTime: number | null }>[] = [];
+
         reportsSnapshot.docs.forEach(doc => {
             const data = doc.data();
             if (data.assignedAdminId && adminMap[data.assignedAdminId]) {
@@ -53,10 +59,53 @@ export async function getAdminPerformance(): Promise<AdminPerformance[]> {
                 } else {
                     adminStats.totalPending++;
                 }
+
+                // If confirmed or done, calculate response time
+                if (data.status === "confirmed" || data.status === "done") {
+                    const promise = adminDb
+                        .collection("reports")
+                        .doc(doc.id)
+                        .collection("logs")
+                        .where("action", "==", "confirmed")
+                        .orderBy("createdAt", "asc")
+                        .limit(1)
+                        .get()
+                        .then(logsSnap => {
+                            if (!logsSnap.empty) {
+                                const created = data.createdAt?.seconds ?? 0;
+                                const confirmedTime = logsSnap.docs[0].data().createdAt?.seconds ?? 0;
+                                if (created && confirmedTime) {
+                                    return { adminId: data.assignedAdminId, responseTime: (confirmedTime - created) / 60 };
+                                }
+                            }
+                            return { adminId: data.assignedAdminId, responseTime: null };
+                        });
+                    responsePromises.push(promise);
+                }
             }
         });
 
-        return Object.values(adminMap);
+        // 3. Resolve response times
+        const responseResults = await Promise.all(responsePromises);
+        const adminResponseTimes: Record<string, number[]> = {};
+        
+        responseResults.forEach(res => {
+            if (res.responseTime !== null) {
+                if (!adminResponseTimes[res.adminId]) adminResponseTimes[res.adminId] = [];
+                adminResponseTimes[res.adminId].push(res.responseTime);
+            }
+        });
+
+        const performances = Object.values(adminMap).map(admin => {
+            const times = adminResponseTimes[admin.adminId] || [];
+            const avg = times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : null;
+            return {
+                ...admin,
+                avgResponseMinutes: avg
+            };
+        });
+
+        return performances;
     } catch (error) {
         console.error("Error fetching admin performance:", error);
         return [];

@@ -38,12 +38,11 @@ const USER_NAV = [
 const ADMIN_NAV = [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }];
 
 const SUPERADMIN_NAV = [
-    { href: "/superadmin", label: "Analytics", icon: BarChart3 },
-    { href: "/superadmin/performance", label: "Kinerja Admin", icon: TrendingUp },
-    { href: "/superadmin/users", label: "Manajemen User", icon: Users },
-    { href: "/superadmin/locations", label: "Manajemen Lokasi", icon: MapPin },
+    { href: "/superadmin", label: "Dashboard Analytics", icon: BarChart3 },
+    { href: "/superadmin/users", label: "User", icon: Users },
+    { href: "/superadmin/locations", label: "Lokasi", icon: MapPin },
     { href: "/superadmin/hazard-types", label: "Kategori Bahaya", icon: ShieldAlert },
-    { href: "/superadmin/reports", label: "Semua Laporan", icon: FileText },
+    { href: "/superadmin/reports", label: "Laporan", icon: FileText },
 ];
 
 /**
@@ -131,6 +130,9 @@ export function AppShell({ role, userName, children }: AppShellProps) {
 
                 {/* Navigation */}
                 <nav className="flex-1 p-3 space-y-1 overflow-y-auto mt-2">
+                     <div className="pt-4 pb-2 px-3">
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Manajemen</p>
+                        </div>
                     {navItems.map((item) => {
                         const isActive = pathname === item.href;
                         return (
@@ -150,32 +152,6 @@ export function AppShell({ role, userName, children }: AppShellProps) {
                         );
                     })}
 
-                    {/* Superadmin also sees admin dashboard */}
-                    {isSuperadmin && (
-                        <>
-                            <div className="pt-4 pb-2 px-3">
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Admin View</p>
-                            </div>
-                            {ADMIN_NAV.map((item) => {
-                                const isActive = pathname === item.href;
-                                return (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        className={cn(
-                                            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
-                                            isActive
-                                                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
-                                                : "text-slate-400 hover:text-white hover:bg-slate-800"
-                                        )}
-                                    >
-                                        <item.icon className="w-4 h-4 shrink-0" />
-                                        <span className="truncate">{item.label}</span>
-                                    </Link>
-                                );
-                            })}
-                        </>
-                    )}
                 </nav>
 
                 {/* User Info & Logout */}

@@ -2,8 +2,10 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { adminDb } from "@/lib/firebase/admin";
 import { loginSchema } from "@/lib/validations/auth";
+import { authConfig } from "./auth.config";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
+  ...authConfig,
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -46,25 +48,4 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
-        token.id = user.id;
-      }
-      return token;
-    },
-    session({ session, token }) {
-      if (typeof token.role === "string") {
-        session.user.role = token.role as "user" | "admin" | "superadmin";
-      }
-      if (typeof token.id === "string") {
-        session.user.id = token.id;
-      }
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/login",
-  },
 });

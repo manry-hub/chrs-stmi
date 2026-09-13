@@ -9,15 +9,26 @@ export async function getAnalytics() {
   if (session?.user.role !== "superadmin") throw new Error("Unauthorized");
 
   const reportsSnap = await adminDb.collection("reports").get();
-  const reports = reportsSnap.docs.map((d) => d.data());
+  const reports = reportsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
   const total = reports.length;
-  const pending = reports.filter((r) => r.status === "pending").length;
-  const confirmed = reports.filter((r) => r.status === "confirmed").length;
-  const done = reports.filter((r) => r.status === "done").length;
+  const pending = reports.filter((r: any) => r.status === "pending").length;
+  const confirmed = reports.filter((r: any) => r.status === "confirmed").length;
+  const done = reports.filter((r: any) => r.status === "done").length;
+
+  const pendingList = reports
+    .filter((r: any) => r.status === "pending")
+    .map((r: any) => ({
+      id: r.id,
+      description: r.description,
+      locationName: r.location?.name || "Lokasi tidak diketahui",
+      createdAt: r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000).toISOString() : null,
+    }))
+    .sort((a, b) => (b.createdAt ? new Date(b.createdAt).getTime() : 0) - (a.createdAt ? new Date(a.createdAt).getTime() : 0))
+    .slice(0, 5); // top 5 oldest/newest? let's do newest.
 
   const sourceCounts: Record<string, number> = {};
-  reports.forEach((r) => {
+  reports.forEach((r: any) => {
     if (r.description) {
       sourceCounts[r.description] = (sourceCounts[r.description] || 0) + 1;
     }
@@ -64,5 +75,5 @@ export async function getAnalytics() {
       ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
       : null;
 
-  return { total, pending, confirmed, done, avgResponseMinutes, topSources };
+  return { total, pending, confirmed, done, avgResponseMinutes, topSources, pendingList };
 }
