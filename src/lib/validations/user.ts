@@ -16,6 +16,13 @@ export const createUserSchema = userFormSchema.extend({
 
 export const updateUserSchema = userFormSchema.omit({ password: true });
 
+export const updateProfileSchema = z.object({
+  name: z.string().min(2, "Nama minimal 2 karakter"),
+  phone: z.string().min(8, "Telepon minimal 8 karakter"),
+  password: z.string().min(6, "Password minimal 6 karakter").optional().or(z.literal("")),
+});
+
 export type UserFormInput = z.infer<typeof userFormSchema>;
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

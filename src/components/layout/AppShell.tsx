@@ -20,6 +20,7 @@ import {
     TrendingUp,
     MapPin,
     ShieldAlert,
+    User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types";
@@ -81,10 +82,10 @@ export function AppShell({ role, userName, children }: AppShellProps) {
 
     // Role-specific styling
     const roleBadgeClass = isSuperadmin
-        ? "bg-purple-500/20 text-purple-300"
+        ? "text-purple-300"
         : isAdmin
-        ? "bg-blue-500/20 text-blue-300"
-        : "bg-emerald-500/20 text-emerald-300";
+        ? "text-blue-300"
+        : "text-emerald-300";
 
     const roleLabel = isSuperadmin ? "kepala cs" : isAdmin ? "cleaning service" : "civitas akademika";
 
@@ -111,7 +112,7 @@ export function AppShell({ role, userName, children }: AppShellProps) {
                             <h2 className="text-sm font-bold tracking-wide truncate">HazardReport</h2>
                             <span
                                 className={cn(
-                                    "text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 rounded-full inline-block mt-0.5",
+                                    "text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 inline-block mt-0.5",
                                     roleBadgeClass
                                 )}
                             >
@@ -157,10 +158,19 @@ export function AppShell({ role, userName, children }: AppShellProps) {
 
                 {/* User Info & Logout */}
                 <div className="p-4 border-t border-slate-800 shrink-0 bg-slate-900/50 flex flex-col gap-3">
-                    <div className="px-3">
-                        <p className="text-xs text-slate-400 mb-0.5">Signed in as</p>
-                        <p className="text-sm font-medium text-slate-200 truncate">{userName}</p>
-                    </div>
+                    
+                    <Link
+                        href="/profile"
+                        className={cn(
+                            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                            pathname === "/profile"
+                                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+                                : "text-slate-400 hover:text-white hover:bg-slate-800"
+                        )}
+                    >
+                        <User className="w-4 h-4 shrink-0" />
+                        <span className="truncate">Profil Saya</span>
+                    </Link>
                     <button
                         onClick={() => signOut({ callbackUrl: "/login" })}
                         className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-all duration-200"
