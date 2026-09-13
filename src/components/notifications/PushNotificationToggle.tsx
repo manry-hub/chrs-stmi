@@ -38,21 +38,69 @@ export function PushNotificationToggle() {
   useEffect(() => {
     setMounted(true);
     if (typeof window !== "undefined" && "serviceWorker" in window.navigator && "PushManager" in window) {
-      checkSubscription();
+      checkAndAutoSubscribe();
     } else {
       setLoading(false);
     }
   }, []);
 
-  async function checkSubscription() {
+  async function checkAndAutoSubscribe() {
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (!registration) {
+        setLoading(false);
+        return;
+      }
+      
       const subscription = await registration.pushManager.getSubscription();
-      setIsSubscribed(!!subscription);
+      const hasSubscribed = !!subscription;
+      setIsSubscribed(hasSubscribed);
+      
+      // Auto-subscribe logic
+      if (!hasSubscribed && Notification.permission !== "denied") {
+        const hasPrompted = localStorage.getItem("has_prompted_push");
+        
+        // If granted, always try to subscribe in background.
+        // If default (not asked), only prompt if we haven't asked before in this browser.
+        if (Notification.permission === "granted" || !hasPrompted) {
+          if (Notification.permission === "default") {
+            localStorage.setItem("has_prompted_push", "true");
+          }
+          
+          await handleSubscribe(registration);
+        }
+      }
     } catch (error) {
       console.error("Error checking subscription:", error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleSubscribe(registration: ServiceWorkerRegistration) {
+    if (!VAPID_PUBLIC_KEY) return;
+    
+    try {
+      if (Notification.permission !== "granted") {
+        const result = await Notification.requestPermission();
+        if (result !== "granted") return;
+      }
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+
+      const result = await subscribeNotification(subscription.toJSON() as PushSubscriptionJSON);
+      if (result.success) {
+        setIsSubscribed(true);
+        // Only show toast if it's not a silent background subscription
+        if (Notification.permission !== "granted" || localStorage.getItem("manual_toggle_push")) {
+          toast.success("Notifikasi diaktifkan!", { id: "push-subscribe-toast" });
+        }
+      }
+    } catch (error) {
+      console.error("Auto subscribe error:", error);
     }
   }
 
@@ -66,40 +114,24 @@ export function PushNotificationToggle() {
     try {
       if (isSubscribed) {
         // Unsubscribe
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
-        if (subscription) {
-          await subscription.unsubscribe();
-          await unsubscribeNotification();
-          setIsSubscribed(false);
-          toast.success("Notifikasi dinonaktifkan.");
+        const registration = await navigator.serviceWorker.getRegistration();
+        if (registration) {
+          const subscription = await registration.pushManager.getSubscription();
+          if (subscription) {
+            await subscription.unsubscribe();
+            await unsubscribeNotification();
+            setIsSubscribed(false);
+            toast.success("Notifikasi dinonaktifkan.", { id: "push-unsubscribe-toast" });
+          }
         }
       } else {
         // Subscribe
-        const registration = await navigator.serviceWorker.ready;
-        
-        // Request permission if not granted
-        if (Notification.permission !== "granted") {
-          const result = await Notification.requestPermission();
-          if (result !== "granted") {
-            toast.error("Izin notifikasi ditolak.");
-            return;
-          }
+        localStorage.setItem("manual_toggle_push", "true");
+        let registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+           registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
         }
-
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-        });
-
-        const result = await subscribeNotification(subscription.toJSON() as PushSubscriptionJSON);
-        if (result.success) {
-          setIsSubscribed(true);
-          toast.success("Notifikasi diaktifkan!");
-        } else {
-          toast.error(result.error || "Gagal mengaktifkan notifikasi.");
-          await subscription.unsubscribe();
-        }
+        await handleSubscribe(registration);
       }
     } catch (error) {
       console.error("Error toggling notification:", error);

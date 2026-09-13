@@ -6,6 +6,7 @@ import { submitReportSchema } from "@/lib/validations/report";
 import { FieldValue } from "firebase-admin/firestore";
 
 import { sendPushToAdmins } from "@/lib/notifications/sendPushToAdmins";
+import { sendPushToAll } from "@/lib/notifications/sendPushToAll";
 
 export async function submitReport(formData: unknown) {
   const session = await auth();
@@ -39,12 +40,23 @@ export async function submitReport(formData: unknown) {
     createdAt: FieldValue.serverTimestamp(),
   });
 
-  // Send push notification to all admins (fire and forget)
+  const reportDetailUrl = `/admin/reports/${reportRef.id}`;
+  const locationName = data.location.name;
+  const reporterName = session.user.name || "Seorang user";
+
+  // Send push notification to assigned admin + superadmins (fire and forget)
   sendPushToAdmins({
     title: "Laporan Bahaya Baru!",
-    body: `${session.user.name || "Seorang user"} baru saja melaporkan bahaya di ${data.location.name}.`,
-    url: "/superadmin/reports", // Or /admin depending on which one the admin uses
+    body: `${reporterName} baru saja melaporkan bahaya di ${locationName}.`,
+    url: reportDetailUrl,
   }, data.assignedAdminId).catch(err => console.error("Critical error in report submission push:", err));
+
+  // Send push notification to ALL subscribed users (civitas), excluding the reporter
+  sendPushToAll({
+    title: "⚠️ Laporan Bahaya Baru",
+    body: `${reporterName} melaporkan: ${data.description} di ${locationName}.${data.additionalMessage ? ` Pesan: ${data.additionalMessage}` : ""}`,
+    url: reportDetailUrl,
+  }, session.user.id).catch(err => console.error("Error sending push to all:", err));
 
   return { success: true, reportId: reportRef.id };
 }

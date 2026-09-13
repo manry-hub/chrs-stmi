@@ -29,18 +29,20 @@ self.addEventListener('push', function (event) {
 
 self.addEventListener('notificationclick', function (event) {
   event.notification.close();
+
+  const targetUrl = event.notification.data.url || '/admin';
+
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((clientList) => {
-      if (clientList.length > 0) {
-        let client = clientList[0];
-        for (let i = 0; i < clientList.length; i++) {
-          if (clientList[i].focused) {
-            client = clientList[i];
-          }
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // If there's already an open tab, navigate it to the target URL
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        if ('navigate' in client) {
+          return client.navigate(targetUrl).then(() => client.focus());
         }
-        return client.focus();
       }
-      return clients.openWindow(event.notification.data.url);
+      // Otherwise open a new window
+      return clients.openWindow(targetUrl);
     })
   );
 });

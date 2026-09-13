@@ -1,8 +1,10 @@
 import { getAnalytics } from "@/actions/analytics/getAnalytics";
 import { getAdminPerformance } from "@/actions/admin/performance";
+import { getNotificationSettings } from "@/actions/notifications/notificationSettings";
 import { FileText, AlertTriangle, CheckCircle, Clock, ClipboardList } from "lucide-react";
 import { SuperadminCharts } from "@/components/superadmin/SuperadminCharts";
 import { DashboardDateFilter } from "@/components/superadmin/DashboardDateFilter";
+import { NotificationSettingsCard } from "@/components/superadmin/NotificationSettingsCard";
 import { DateFilterRange } from "@/lib/utils";
 
 interface PageProps {
@@ -13,9 +15,10 @@ export default async function SuperadminDashboard({ searchParams }: PageProps) {
   const { date } = await searchParams;
   const dateFilter = (date as DateFilterRange) || "hari";
 
-  const [{ total, pending, confirmed, done, avgResponseMinutes, topSources, pendingList }, performances] = await Promise.all([
+  const [{ total, pending, confirmed, done, avgResponseMinutes, topSources, pendingList }, performances, notifSettings] = await Promise.all([
     getAnalytics(dateFilter),
-    getAdminPerformance(dateFilter)
+    getAdminPerformance(dateFilter),
+    getNotificationSettings()
   ]);
 
   // Calculate totals for admin performance
@@ -71,12 +74,12 @@ export default async function SuperadminDashboard({ searchParams }: PageProps) {
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Penyelesaian</p>
-              <h3 className="text-3xl font-bold text-yellow-600">
+              <h3 className="text-3xl font-bold text-green-600">
                 {total > 0 ? ((done / total) * 100).toFixed(1) : "0"}%
               </h3>
             </div>
-            <div className="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center shrink-0">
-              <CheckCircle className="w-5 h-5 text-yellow-600" />
+            <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
+              <CheckCircle className="w-5 h-5 text-green-600" />
             </div>
           </div>
         
@@ -185,6 +188,10 @@ export default async function SuperadminDashboard({ searchParams }: PageProps) {
             </table>
         </div>
       </div>
+
+      {/* Notification Settings */}
+      <NotificationSettingsCard initialThresholdHours={notifSettings.staleReportThresholdHours} />
+
     </div>
   );
 }

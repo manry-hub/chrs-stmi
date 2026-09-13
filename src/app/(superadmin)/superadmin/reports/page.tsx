@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { subscribeToAllReportsAdmin } from "@/lib/firebase/reports";
 import { ReportTable } from "@/components/admin/ReportTable";
 import { DateFilterBar } from "@/components/admin/DateFilterBar";
-import type { ReportDocument } from "@/types";
+import { ReportFilterBar } from "@/components/admin/ReportFilterBar";
+import type { ReportDocument, ReportStatus } from "@/types";
 import { Loader2, Plus, PlusCircle } from "lucide-react";
 import { DateFilterRange, isWithinDateRange } from "@/lib/utils";
 import Link from "next/link";
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/Button";
 export default function SuperadminReportsPage() {
     const [reports, setReports] = useState<ReportDocument[]>([]);
     const [dateFilter, setDateFilter] = useState<DateFilterRange>("hari");
+    const [statusFilter, setStatusFilter] = useState<ReportStatus | "all">("all");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +34,9 @@ export default function SuperadminReportsPage() {
     }, []);
 
     const filtered = reports.filter((r) => {
-        return isWithinDateRange(r.createdAt as any, dateFilter);
+        const matchesDate = isWithinDateRange(r.createdAt as any, dateFilter);
+        const matchesStatus = statusFilter === "all" || r.status === statusFilter;
+        return matchesDate && matchesStatus;
     });
 
     return (
@@ -47,12 +51,16 @@ export default function SuperadminReportsPage() {
 
             {/* Filter */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                
-                <Button className="shadow-lg shadow-blue-500/20">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Tambah Laporan
-                </Button>
-                <DateFilterBar value={dateFilter} onChange={setDateFilter} />
+                <Link href="/dashboard">
+                    <Button className="shadow-lg shadow-blue-500/20 w-full sm:w-auto">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Tambah Laporan
+                    </Button>
+                </Link>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <ReportFilterBar value={statusFilter} onChange={setStatusFilter} />
+                    <DateFilterBar value={dateFilter} onChange={setDateFilter} />
+                </div>
             </div>
 
             {/* Report Table or Loading */}

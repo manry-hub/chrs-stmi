@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { subscribeToAllReportsAdmin } from "@/lib/firebase/reports";
 import {
     LayoutDashboard,
     BarChart3,
@@ -32,7 +33,10 @@ const USER_NAV = [
     { href: "/dashboard/reports", label: "Riwayat Laporan", icon: ClipboardList },
 ];
 
-const ADMIN_NAV = [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }];
+const ADMIN_NAV = [
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin/reports", label: "Manajemen Laporan", icon: FileText }
+];
 
 const SUPERADMIN_NAV = [
     { href: "/superadmin", label: "Analytics", icon: BarChart3 },
@@ -54,6 +58,22 @@ export function AdminSidebar({ role, userName }: AdminSidebarProps) {
     const navItems = isSuperadmin ? SUPERADMIN_NAV : isAdmin ? ADMIN_NAV : USER_NAV;
 
     const [isOpen, setIsOpen] = useState(false);
+    const [pendingCount, setPendingCount] = useState(0);
+
+    // Subscribe to reports to get pending count
+    useEffect(() => {
+        if (role === "user") return;
+        
+        const unsub = subscribeToAllReportsAdmin(
+            (data) => {
+                const count = data.filter((r) => r.status === "pending").length;
+                setPendingCount(count);
+            },
+            (err) => console.error("Error fetching report count for sidebar:", err)
+        );
+        
+        return () => unsub();
+    }, [role]);
 
     // Auto-hide on mobile resize
     useEffect(() => {
@@ -138,19 +158,27 @@ export function AdminSidebar({ role, userName }: AdminSidebarProps) {
                 <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
                     {navItems.map((item) => {
                         const isActive = pathname === item.href;
+                        const isReportMgmt = item.label === "Manajemen Laporan";
                         return (
                             <Link
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                                    "flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                                     isActive
                                         ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
                                         : "text-slate-400 hover:text-white hover:bg-slate-800"
                                 )}
                             >
-                                <item.icon className="w-4 h-4 shrink-0" />
-                                <span className="truncate">{item.label}</span>
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <item.icon className="w-4 h-4 shrink-0" />
+                                    <span className="truncate">{item.label}</span>
+                                </div>
+                                {isReportMgmt && pendingCount > 0 && (
+                                    <div className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold shrink-0">
+                                        {pendingCount > 99 ? '99+' : pendingCount}
+                                    </div>
+                                )}
                             </Link>
                         );
                     })}
@@ -163,19 +191,27 @@ export function AdminSidebar({ role, userName }: AdminSidebarProps) {
                             </div>
                             {ADMIN_NAV.map((item) => {
                                 const isActive = pathname === item.href;
+                                const isReportMgmt = item.label === "Manajemen Laporan";
                                 return (
                                     <Link
                                         key={item.href}
                                         href={item.href}
                                         className={cn(
-                                            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                                            "flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
                                             isActive
                                                 ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
                                                 : "text-slate-400 hover:text-white hover:bg-slate-800"
                                         )}
                                     >
-                                        <item.icon className="w-4 h-4 shrink-0" />
-                                        <span className="truncate">{item.label}</span>
+                                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                                            <item.icon className="w-4 h-4 shrink-0" />
+                                            <span className="truncate">{item.label}</span>
+                                        </div>
+                                        {isReportMgmt && pendingCount > 0 && (
+                                            <div className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold shrink-0">
+                                                {pendingCount > 99 ? '99+' : pendingCount}
+                                            </div>
+                                        )}
                                     </Link>
                                 );
                             })}

@@ -3,6 +3,7 @@
 import { adminDb } from "@/lib/firebase/admin";
 import { auth } from "@/lib/auth";
 import { DateFilterRange, isWithinDateRange } from "@/lib/utils";
+import { calculateEffectiveMinutes } from "@/lib/businessHours";
 
 export interface AdminPerformance {
     adminId: string;
@@ -85,7 +86,7 @@ export async function getAdminPerformance(dateFilter: DateFilterRange = "hari"):
                                 const created = data.createdAt?.seconds ?? 0;
                                 const confirmedTime = logsSnap.docs[0].data().createdAt?.seconds ?? 0;
                                 if (created && confirmedTime) {
-                                    return { adminId: data.assignedAdminId, responseTime: (confirmedTime - created) / 60 };
+                                    return { adminId: data.assignedAdminId, responseTime: calculateEffectiveMinutes(created, confirmedTime) };
                                 }
                             }
                             return { adminId: data.assignedAdminId, responseTime: null };

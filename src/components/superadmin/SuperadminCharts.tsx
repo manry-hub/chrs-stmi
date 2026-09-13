@@ -3,6 +3,8 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Cell } from "recharts";
 import Link from "next/link";
 import { MapPin, CheckCircle2 } from "lucide-react";
+import { NotifyAdminButton } from "@/components/superadmin/NotifyAdminButton";
+import { NotifyAllAdminsButton } from "@/components/superadmin/NotifyAllAdminsButton";
 
 interface PendingReport {
   id: string;
@@ -31,9 +33,7 @@ export function SuperadminCharts({ total, pendingList, topSources }: SuperadminC
             <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm min-h-[300px] flex flex-col">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-sm font-semibold text-slate-700">Laporan Menunggu Tindakan</h3>
-                    {pendingList.length > 0 && (
-                        <span className="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded-full">{pendingList.length} terbaru</span>
-                    )}
+                    <NotifyAllAdminsButton reportIds={pendingList.map(r => r.id)} />
                 </div>
                 
                 {pendingList.length > 0 ? (
@@ -47,9 +47,12 @@ export function SuperadminCharts({ total, pendingList, topSources }: SuperadminC
                                             {report.createdAt ? new Date(report.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : ''}
                                         </span>
                                     </div>
-                                    <div className="flex items-center text-xs text-slate-500 mt-2">
-                                        <MapPin className="w-3 h-3 mr-1" />
-                                        <span className="truncate">{report.locationName}</span>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <div className="flex items-center text-xs text-slate-500">
+                                            <MapPin className="w-3 h-3 mr-1" />
+                                            <span className="truncate max-w-[150px]">{report.locationName}</span>
+                                        </div>
+                                        <NotifyAdminButton reportId={report.id} />
                                     </div>
                                 </div>
                             </Link>

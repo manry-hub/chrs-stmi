@@ -67,27 +67,34 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
         setSubmitError(null);
 
         try {
-            // 1. Dapatkan GPS otomatis
-            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-                if (!navigator.geolocation) {
-                    reject(new Error("Browser Anda tidak mendukung geolokasi."));
-                } else {
-                    navigator.geolocation.getCurrentPosition(resolve, reject, {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0,
-                    });
+            const isGeofenceEnabled = process.env.NEXT_PUBLIC_ENABLE_GEOFENCING === "true";
+            
+            let lat = 0;
+            let lng = 0;
+
+            if (isGeofenceEnabled) {
+                // 1. Dapatkan GPS otomatis
+                const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                    if (!navigator.geolocation) {
+                        reject(new Error("Browser Anda tidak mendukung geolokasi."));
+                    } else {
+                        navigator.geolocation.getCurrentPosition(resolve, reject, {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 0,
+                        });
+                    }
+                }).catch(() => {
+                    throw new Error("Gagal mendapatkan lokasi. Pastikan GPS aktif dan izin diberikan.");
+                });
+
+                lat = position.coords.latitude;
+                lng = position.coords.longitude;
+
+                // 2. Cek Geofence
+                if (!isWithinSTMI(lat, lng)) {
+                    throw new Error("Laporan ditolak: Anda berada di luar kawasan Politeknik STMI Jakarta.");
                 }
-            }).catch(() => {
-                throw new Error("Gagal mendapatkan lokasi. Pastikan GPS aktif dan izin diberikan.");
-            });
-
-            const lat = position.coords.latitude;
-            const lng = position.coords.longitude;
-
-            // 2. Cek Geofence
-            if (!isWithinSTMI(lat, lng)) {
-                throw new Error("Laporan ditolak: Anda berada di luar kawasan Politeknik STMI Jakarta.");
             }
 
             // 3. Upload Image

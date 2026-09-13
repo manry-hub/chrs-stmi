@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { subscribeToAllReportsAdmin } from "@/lib/firebase/reports";
 import { ReportTable } from "@/components/admin/ReportTable";
 import { DateFilterBar } from "@/components/admin/DateFilterBar";
-import type { ReportDocument } from "@/types";
+import { ReportFilterBar } from "@/components/admin/ReportFilterBar";
+import type { ReportDocument, ReportStatus } from "@/types";
 import { Loader2, Plus } from "lucide-react";
 import { DateFilterRange, isWithinDateRange } from "@/lib/utils";
 import Link from "next/link";
@@ -15,6 +16,7 @@ export default function AdminReportsPage() {
   const { data: session } = useSession();
   const [reports, setReports] = useState<ReportDocument[]>([]);
   const [dateFilter, setDateFilter] = useState<DateFilterRange>("hari");
+  const [statusFilter, setStatusFilter] = useState<ReportStatus | "all">("all");
   const [viewMode, setViewMode] = useState<"all" | "my-locations">("my-locations");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,9 +36,12 @@ export default function AdminReportsPage() {
     return unsub;
   }, []);
 
-  const baseReports = viewMode === "my-locations" && session?.user?.id
-    ? reports.filter(r => r.assignedAdminId === session.user.id && isWithinDateRange(r.createdAt as any, dateFilter))
-    : reports.filter(r => isWithinDateRange(r.createdAt as any, dateFilter));
+  const baseReports = reports.filter((r) => {
+    const isMyLoc = viewMode === "all" || (r.assignedAdminId === session?.user?.id);
+    const matchesDate = isWithinDateRange(r.createdAt as any, dateFilter);
+    const matchesStatus = statusFilter === "all" || r.status === statusFilter;
+    return isMyLoc && matchesDate && matchesStatus;
+  });
 
   return (
     <div className="space-y-6">
@@ -73,7 +78,10 @@ export default function AdminReportsPage() {
             Tambah Laporan
           </Button>
         </Link>
-        <DateFilterBar value={dateFilter} onChange={setDateFilter} />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <ReportFilterBar value={statusFilter} onChange={setStatusFilter} />
+          <DateFilterBar value={dateFilter} onChange={setDateFilter} />
+        </div>
       </div>
 
       {/* Report Table or Loading */}

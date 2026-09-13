@@ -2,6 +2,7 @@ import type { ReportDocument } from "@/types";
 import { MapPin, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { NotifyAdminButton } from "@/components/superadmin/NotifyAdminButton";
 
 function formatTimeAgo(timestamp: { seconds: number } | null | undefined): string {
   if (!timestamp || !("seconds" in timestamp)) return "-";
@@ -21,7 +22,7 @@ function formatTimeAgo(timestamp: { seconds: number } | null | undefined): strin
   return Math.floor(seconds) + " detik yang lalu";
 }
 
-export function PendingReportCard({ report }: { report: ReportDocument }) {
+export function PendingReportCard({ report, showNotifyButton = false }: { report: ReportDocument; showNotifyButton?: boolean }) {
   return (
     <div className="bg-white rounded-2xl border border-red-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col group relative">
         {/* Urgent Indicator */}
@@ -69,14 +70,19 @@ export function PendingReportCard({ report }: { report: ReportDocument }) {
           {report.description}
         </p>
 
-        {/* Action Button */}
-        <Link 
-            href={`/admin/reports/${report.id}`}
-            className="w-full inline-flex items-center justify-center gap-2 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-200"
-        >
-            Lihat & Konfirmasi
-            <ArrowRight className="w-4 h-4" />
-        </Link>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          <Link 
+              href={`/admin/reports/${report.id}`}
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-red-50 hover:bg-red-500 text-red-600 hover:text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors duration-200"
+          >
+              Lihat & Konfirmasi
+              <ArrowRight className="w-4 h-4" />
+          </Link>
+          {showNotifyButton && (
+            <NotifyAdminButton reportId={report.id} />
+          )}
+        </div>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { adminDb } from "@/lib/firebase/admin";
 import { HAZARD_TYPES } from "@/constants";
 import { DateFilterRange, isWithinDateRange } from "@/lib/utils";
+import { calculateEffectiveMinutes } from "@/lib/businessHours";
 
 export async function getAnalytics(dateFilter: DateFilterRange = "hari") {
   const session = await auth();
@@ -79,7 +80,8 @@ export async function getAnalytics(dateFilter: DateFilterRange = "hari") {
       const created = doc.data().createdAt?.seconds ?? 0;
       const confirmedTime = logsSnap.docs[0].data().createdAt?.seconds ?? 0;
       if (created && confirmedTime) {
-        responseTimes.push((confirmedTime - created) / 60); // minutes
+        const effectiveMins = calculateEffectiveMinutes(created, confirmedTime);
+        responseTimes.push(effectiveMins);
       }
     }
   }

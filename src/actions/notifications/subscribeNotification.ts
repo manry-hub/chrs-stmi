@@ -14,8 +14,8 @@ export async function subscribeNotification(subscription: {
 }) {
   const session = await auth();
 
-  if (!session || !["admin", "superadmin"].includes(session.user.role)) {
-    throw new Error("Unauthorized. Only admins can subscribe to notifications.");
+  if (!session) {
+    throw new Error("Unauthorized. Silakan login terlebih dahulu.");
   }
 
   const userId = session.user.id;

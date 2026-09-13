@@ -17,7 +17,7 @@ const FILTERS: { value: ReportStatus | "all"; label: string }[] = [
 
 export function ReportFilterBar({ value, onChange }: ReportFilterBarProps) {
   return (
-    <div className="flex bg-slate-100 p-1 rounded-lg w-fit overflow-x-auto mb-6">
+    <div className="flex bg-slate-100 p-1 rounded-lg w-fit overflow-x-auto">
       {FILTERS.map((f) => (
         <button
           key={f.value}
