@@ -29,7 +29,6 @@ export const HAZARD_TYPES = [
     { value: "sampah-menumpuk", label: "Sampah menumpuk" },
     { value: "fasilitas-rusak", label: "Fasilitas umum rusak (kursi, meja, dsb)" },
     { value: "penempatan-alat-berat-yang-tidak-sesuai-tempatnya", label: "penempatan-alat-berat-yang-tidak-sesuai-tempatnya" },
-    { value: "tidak-ada-didalam-daftar-isi-di-pesan-tambahan", label: "Tidak ada didalam daftar, Isi di pesan tambahan" },
 ];
 
 export const CAMPUS_LOCATIONS = [

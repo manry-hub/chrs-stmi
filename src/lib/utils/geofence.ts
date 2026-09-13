@@ -9,7 +9,7 @@ export const STMI_COORDINATES = {
 };
 
 // Radius toleransi dalam meter (cukup luas untuk mencakup GPS drift)
-export const STMI_RADIUS_METERS = 150;
+export const STMI_RADIUS_METERS = 100;
 
 /**
  * Menghitung jarak antara dua koordinat menggunakan rumus Haversine.
@@ -34,6 +34,12 @@ export function getDistanceInMeters(lat1: number, lon1: number, lat2: number, lo
  * Mengecek apakah koordinat yang diberikan berada di dalam kawasan STMI.
  */
 export function isWithinSTMI(lat: number, lng: number): boolean {
+    // BYPASS UNTUK DEVELOPMENT:
+    // Selalu mengembalikan true agar bisa testing dari lokasi manapun
+    return true;
+    
+    /*
     const distance = getDistanceInMeters(lat, lng, STMI_COORDINATES.lat, STMI_COORDINATES.lng);
     return distance <= STMI_RADIUS_METERS;
+    */
 }

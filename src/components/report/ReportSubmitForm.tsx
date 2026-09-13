@@ -8,7 +8,7 @@ import type { SubmitReportInput as ReportInput } from "@/lib/validations/report"
 import { submitReport } from "@/actions/reports/submitReport";
 import { Button } from "../ui/Button";
 import { Textarea } from "../ui/Textarea";
-import { Select } from "../ui/Select";
+import { Combobox } from "../ui/Combobox";
 import { Label } from "../ui/Label";
 import { ImagePreview } from "./ImagePreview";
 import { LocationPicker } from "./LocationPicker";
@@ -47,7 +47,7 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
 
             // Validate other fields via Zod
             if (!values.description) {
-                errs.description = { type: "required", message: "Jenis sumber potensi bahaya wajib dipilih" };
+                errs.description = { type: "required", message: "Jenis sumber potensi bahaya wajib diisi" };
             }
 
             if (!values.location?.name || values.location.name.length < 1) {
@@ -127,8 +127,7 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
             if (!res.success) throw new Error("Gagal mengirim laporan");
 
             toast.success("Laporan berhasil dikirim!");
-            router.push(ROUTES.DASHBOARD_REPORTS);
-            router.refresh();
+            router.push(`${ROUTES.REPORTS}/${res.reportId}`);
         } catch (err) {
             console.error(err);
             const msg = err instanceof Error ? err.message : "Terjadi kesalahan sistem.";
@@ -153,22 +152,29 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
 
                 <div>
                     <Label htmlFor="description" className="mb-2 block">
-                        Pilih Jenis Sumber Potensi Bahaya
+                        Jenis Sumber Potensi Bahaya
                     </Label>
-                    <Select
-                        id="description"
-                        options={hazardOptions}
-                        {...register("description")}
-                        error={errors.description?.message}
+                    <Controller
+                        name="description"
+                        control={control}
+                        render={({ field }) => (
+                            <Combobox
+                                options={hazardOptions}
+                                value={field.value}
+                                onChange={field.onChange}
+                                placeholder="Ketik atau pilih jenis bahaya..."
+                                error={errors.description?.message}
+                            />
+                        )}
                     />
                 </div>
                 <div>
                     <Label htmlFor="additionalMessage" className="mb-2 block">
-                        Masukan Sumber Potensi Bahaya Lainnya (jika tidak ada di pilihan)
+                        Informasi Tambahan (Opsional)
                     </Label>
                     <Textarea
                         id="additionalMessage"
-                        placeholder="Informasi tambahan lainnya..."
+                        placeholder="Keterangan tambahan terkait laporan..."
                         {...register("additionalMessage")}
                         className="min-h-[60px]"
                     />

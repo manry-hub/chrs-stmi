@@ -49,11 +49,6 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
         <div className="min-h-screen bg-slate-50 py-10">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-wrap items-center gap-4 mb-6">
-                    <Link href={ROUTES.HOME} className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors">
-                        <Home className="w-4 h-4" />
-                        Home
-                    </Link>
-                    <span className="text-slate-300">/</span>
                     <Link
                         href={ROUTES.REPORTS}
                         className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors"

@@ -67,7 +67,7 @@ export default function AdminDashboard() {
                 onClick={() => setViewMode("all")}
                 className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewMode === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
-                Semua Laporan
+                Manajemen Laporan
             </button>
             <button
                 onClick={() => setViewMode("my-locations")}
