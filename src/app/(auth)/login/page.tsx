@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { ROUTES } from "@/constants";
+import { Eye, EyeOff } from "lucide-react";
 
 /** Determine the correct landing page based on user role */
 function getRedirectPath(role?: string, loc?: string | null): string {
@@ -28,6 +29,7 @@ function getRedirectPath(role?: string, loc?: string | null): string {
 export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const loc = searchParams.get("loc");
@@ -84,7 +86,16 @@ export default function LoginPage() {
 
                 <div>
                     <Label htmlFor="password">Password</Label>
-                    <Input id="password" type="password" {...register("password")} />
+                    <div className="relative">
+                        <Input id="password" type={showPassword ? "text" : "password"} {...register("password")} className="pr-10" />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                    </div>
                     {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
                 </div>
 

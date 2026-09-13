@@ -35,14 +35,17 @@ const USER_NAV = [
     { href: "/dashboard/reports", label: "Riwayat Laporan", icon: ClipboardList },
 ];
 
-const ADMIN_NAV = [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }];
+const ADMIN_NAV = [
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin/reports", label: "Manajemen Laporan", icon: FileText }
+];
 
 const SUPERADMIN_NAV = [
     { href: "/superadmin", label: "Dashboard Analytics", icon: BarChart3 },
-    { href: "/superadmin/users", label: "User", icon: Users },
-    { href: "/superadmin/locations", label: "Lokasi", icon: MapPin },
-    { href: "/superadmin/hazard-types", label: "Kategori Bahaya", icon: ShieldAlert },
-    { href: "/superadmin/reports", label: "Laporan", icon: FileText },
+    { href: "/superadmin/users", label: "Manajemen User", icon: Users },
+    { href: "/superadmin/locations", label: "Manajemen Lokasi", icon: MapPin },
+    { href: "/superadmin/hazard-types", label: "Manajemen Jenis Bahaya", icon: ShieldAlert },
+    { href: "/superadmin/reports", label: "Manajemen Laporan", icon: FileText },
 ];
 
 /**
@@ -83,7 +86,7 @@ export function AppShell({ role, userName, children }: AppShellProps) {
         ? "bg-blue-500/20 text-blue-300"
         : "bg-emerald-500/20 text-emerald-300";
 
-    const roleLabel = isSuperadmin ? "superadmin" : isAdmin ? "admin" : "user";
+    const roleLabel = isSuperadmin ? "kepala cs" : isAdmin ? "cleaning service" : "civitas akademika";
 
     return (
         <div className="flex min-h-screen bg-slate-50">
@@ -130,9 +133,7 @@ export function AppShell({ role, userName, children }: AppShellProps) {
 
                 {/* Navigation */}
                 <nav className="flex-1 p-3 space-y-1 overflow-y-auto mt-2">
-                     <div className="pt-4 pb-2 px-3">
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Manajemen</p>
-                        </div>
+                    
                     {navItems.map((item) => {
                         const isActive = pathname === item.href;
                         return (

@@ -16,8 +16,8 @@ export interface UserDocument {
 export interface LocationDocument {
     id: string;
     name: string;
-    adminId: string | null;
-    adminName: string | null;
+    adminIds: string[];
+    adminNames: string[];
     createdAt: Timestamp;
 }
 

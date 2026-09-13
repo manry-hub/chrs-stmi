@@ -1,6 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'otsvqpenuojyha7p.public.blob.vercel-storage.com',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+  },
   async headers() {
     return [
       {

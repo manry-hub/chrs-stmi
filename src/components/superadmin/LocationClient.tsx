@@ -23,26 +23,29 @@ export function LocationClient({ initialData, admins }: LocationClientProps) {
 
     const [showQR, setShowQR] = useState<string | null>(null); // location id to show QR
 
-    const handleSubmit = async (data: { id: string; name: string; adminId: string }) => {
+    const handleSubmit = async (data: { name: string; adminIds: string[] }) => {
         setIsSubmitting(true);
-        const adminDoc = admins.find(a => a.id === data.adminId);
-        const adminName = adminDoc ? adminDoc.name : null;
+        // Resolve admin names from IDs
+        const adminNames = data.adminIds.map(id => {
+            const admin = admins.find(a => a.id === id);
+            return admin ? admin.name : "Unknown";
+        });
 
         try {
             if (editingLocation) {
-                const res = await updateLocation(data.id, { name: data.name, adminId: data.adminId || null, adminName });
+                const res = await updateLocation(editingLocation.id, { name: data.name, adminIds: data.adminIds, adminNames });
                 if (res.success) {
                     toast.success("Lokasi berhasil diupdate");
-                    setLocations(prev => prev.map(loc => loc.id === data.id ? { ...loc, name: data.name, adminId: data.adminId || null, adminName } : loc));
+                    setLocations(prev => prev.map(loc => loc.id === editingLocation.id ? { ...loc, name: data.name, adminIds: data.adminIds, adminNames } : loc));
                     setIsModalOpen(false);
                 } else {
                     toast.error(res.error || "Gagal mengupdate lokasi");
                 }
             } else {
-                const res = await createLocation({ id: data.id, name: data.name, adminId: data.adminId || null, adminName });
+                const res = await createLocation({ name: data.name, adminIds: data.adminIds, adminNames });
                 if (res.success) {
                     toast.success("Lokasi berhasil ditambahkan");
-                    setLocations(prev => [...prev, { id: data.id.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase(), name: data.name, adminId: data.adminId || null, adminName, createdAt: {} as any }]);
+                    setLocations(prev => [...prev, { id: res.id || crypto.randomUUID(), name: data.name, adminIds: data.adminIds, adminNames, createdAt: {} as any }]);
                     setIsModalOpen(false);
                 } else {
                     toast.error(res.error || "Gagal menambahkan lokasi");
@@ -141,13 +144,16 @@ export function LocationClient({ initialData, admins }: LocationClientProps) {
                                     <tr key={loc.id} className="hover:bg-blue-50/30 transition-colors duration-150">
                                         <td className="px-6 py-4">
                                             <p className="font-medium text-slate-900">{loc.name}</p>
-                                            <p className="font-mono text-xs text-slate-400 mt-1">{loc.id}</p>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {loc.adminId ? (
-                                                <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800 tracking-wide uppercase">
-                                                    {loc.adminName}
-                                                </span>
+                                            {loc.adminIds && loc.adminIds.length > 0 ? (
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {loc.adminNames.map((name, idx) => (
+                                                        <span key={loc.adminIds[idx]} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800 tracking-wide uppercase">
+                                                            {name}
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             ) : (
                                                 <span className="text-slate-400 text-xs italic bg-slate-100 px-2 py-1 rounded-md">Belum di-assign</span>
                                             )}

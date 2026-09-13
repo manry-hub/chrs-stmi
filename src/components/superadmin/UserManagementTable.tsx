@@ -26,12 +26,23 @@ const ROLE_COLORS: Record<string, string> = {
   superadmin: "bg-purple-100 text-purple-700",
 };
 
+const ROLE_LABELS: Record<string, string> = {
+  user: "Civitas Akademika",
+  admin: "Cleaning Service",
+  superadmin: "Kepala CS",
+};
+
 export function UserManagementTable({ users: initialUsers }: UserManagementTableProps) {
   // We use the initialUsers directly from props as Next.js handles re-fetching via revalidatePath
   const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null);
   const [editTarget, setEditTarget] = useState<UserRow | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filterRole, setFilterRole] = useState<string>("all");
   const [isPending, startTransition] = useTransition();
+
+  const filteredUsers = filterRole === "all" 
+    ? initialUsers 
+    : initialUsers.filter(u => (u.role || "user") === filterRole);
 
   const handleCreate = () => {
     setEditTarget(null);
@@ -60,14 +71,41 @@ export function UserManagementTable({ users: initialUsers }: UserManagementTable
 
   return (
     <>
-      <div className="flex justify-start mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <Button onClick={handleCreate} className="shadow-lg shadow-blue-500/20">
           <UserPlus className="w-4 h-4 mr-2" />
           Tambah User Baru
         </Button>
+        
+        <div className="flex bg-slate-100 p-1 rounded-lg w-fit overflow-x-auto">
+            <button
+                onClick={() => setFilterRole("all")}
+                className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            >
+                Semua
+            </button>
+            <button
+                onClick={() => setFilterRole("superadmin")}
+                className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "superadmin" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            >
+                Kepala CS
+            </button>
+            <button
+                onClick={() => setFilterRole("admin")}
+                className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "admin" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            >
+                Cleaning Service
+            </button>
+            <button
+                onClick={() => setFilterRole("user")}
+                className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "user" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+            >
+                Civitas Akademika
+            </button>
+        </div>
       </div>
 
-      {initialUsers.length === 0 ? (
+      {filteredUsers.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
           <Shield className="w-12 h-12 text-slate-300 mx-auto mb-3" />
           <h3 className="text-lg font-semibold text-slate-700">Belum ada user</h3>
@@ -87,14 +125,14 @@ export function UserManagementTable({ users: initialUsers }: UserManagementTable
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {initialUsers.map((user) => (
+                {filteredUsers.map((user) => (
                   <tr key={user.id} className="hover:bg-blue-50/30 transition-colors duration-150">
                     <td className="py-3 px-4 font-medium text-slate-800">{user.name || "-"}</td>
                     <td className="py-3 px-4 text-slate-600">{user.email || "-"}</td>
                     <td className="py-3 px-4 text-slate-600">{user.phone || "-"}</td>
                     <td className="py-3 px-4">
                       <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-md ${ROLE_COLORS[user.role || "user"] || ROLE_COLORS.user}`}>
-                        {user.role || "user"}
+                        {ROLE_LABELS[user.role || "user"] || "Civitas Akademika"}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right">

@@ -2,6 +2,7 @@
 
 import { adminDb } from "@/lib/firebase/admin";
 import { auth } from "@/lib/auth";
+import { DateFilterRange, isWithinDateRange } from "@/lib/utils";
 
 export interface AdminPerformance {
     adminId: string;
@@ -13,7 +14,7 @@ export interface AdminPerformance {
     avgResponseMinutes: number | null;
 }
 
-export async function getAdminPerformance(): Promise<AdminPerformance[]> {
+export async function getAdminPerformance(dateFilter: DateFilterRange = "hari"): Promise<AdminPerformance[]> {
     const session = await auth();
     if (session?.user?.role !== "superadmin") {
         return [];
@@ -27,11 +28,15 @@ export async function getAdminPerformance(): Promise<AdminPerformance[]> {
         const adminMap: Record<string, AdminPerformance> = {};
 
         locations.forEach((loc: any) => {
-            if (loc.adminId) {
-                if (!adminMap[loc.adminId]) {
-                    adminMap[loc.adminId] = {
-                        adminId: loc.adminId,
-                        adminName: loc.adminName || "Unknown Admin",
+            // Support both old (single adminId) and new (adminIds array) format
+            const ids: string[] = loc.adminIds || (loc.adminId ? [loc.adminId] : []);
+            const names: string[] = loc.adminNames || (loc.adminName ? [loc.adminName] : []);
+
+            ids.forEach((adminId: string, index: number) => {
+                if (!adminMap[adminId]) {
+                    adminMap[adminId] = {
+                        adminId,
+                        adminName: names[index] || "Unknown Admin",
                         totalAssigned: 0,
                         totalDone: 0,
                         totalPending: 0,
@@ -39,8 +44,8 @@ export async function getAdminPerformance(): Promise<AdminPerformance[]> {
                         avgResponseMinutes: null,
                     };
                 }
-                adminMap[loc.adminId].locations.push(loc.name);
-            }
+                adminMap[adminId].locations.push(loc.name);
+            });
         });
 
         // 2. Get all reports that have assignedAdminId
@@ -51,6 +56,11 @@ export async function getAdminPerformance(): Promise<AdminPerformance[]> {
 
         reportsSnapshot.docs.forEach(doc => {
             const data = doc.data();
+            
+            // Check if this document falls into our date range
+            const docDate = data.createdAt?.seconds ? new Date(data.createdAt.seconds * 1000) : null;
+            if (!isWithinDateRange(docDate, dateFilter)) return;
+
             if (data.assignedAdminId && adminMap[data.assignedAdminId]) {
                 const adminStats = adminMap[data.assignedAdminId];
                 adminStats.totalAssigned++;

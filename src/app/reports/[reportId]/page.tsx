@@ -101,7 +101,7 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
                                 <div className="flex gap-3 text-slate-700 sm:col-span-2">
                                     <MessageSquare className="w-5 h-5 text-slate-400 shrink-0" />
                                     <div>
-                                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Pesan Tambahan</p>
+                                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Detail lokasi atau deskripsi</p>
                                         <p className="text-sm">{report.additionalMessage}</p>
                                     </div>
                                 </div>

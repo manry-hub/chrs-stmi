@@ -11,10 +11,13 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { ROUTES } from "@/constants";
 import { registerUser } from "@/actions/auth/registerUser";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const loc = searchParams.get("loc");
@@ -66,26 +69,44 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
+                    <Label htmlFor="phone">Nomor Telepon</Label>
+                    <Input id="phone" type="tel" placeholder="081234567890" {...register("phone")} />
+                    {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
+                </div>
+                <div>
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" type="email" placeholder="mahasiswa@univ.edu" {...register("email")} />
                     {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
                 </div>
 
-                <div>
-                    <Label htmlFor="phone">Nomor Telepon</Label>
-                    <Input id="phone" type="tel" placeholder="081234567890" {...register("phone")} />
-                    {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
-                </div>
 
                 <div>
                     <Label htmlFor="password">Password</Label>
-                    <Input id="password" type="password" {...register("password")} />
+                    <div className="relative">
+                        <Input id="password" type={showPassword ? "text" : "password"} {...register("password")} className="pr-10" />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                    </div>
                     {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
                 </div>
 
                 <div>
                     <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
-                    <Input id="confirmPassword" type="password" {...register("confirmPassword")} />
+                    <div className="relative">
+                        <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} {...register("confirmPassword")} className="pr-10" />
+                        <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                            {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                    </div>
                     {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
                 </div>
 

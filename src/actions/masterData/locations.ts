@@ -4,32 +4,34 @@ import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
+import { LocationDocument } from "@/types";
 
-export async function createLocation(data: { id: string; name: string; adminId: string | null; adminName: string | null }) {
+export async function createLocation(data: { name: string; adminIds: string[]; adminNames: string[] }) {
     const session = await auth();
     if (session?.user?.role !== "superadmin") {
         return { success: false, error: "Unauthorized" };
     }
 
     try {
-        const id = data.id.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
-        await adminDb.collection("locations").doc(id).set({
+        // Auto-generate ID via Firestore
+        const docRef = adminDb.collection("locations").doc();
+        await docRef.set({
             name: data.name,
-            adminId: data.adminId,
-            adminName: data.adminName,
+            adminIds: data.adminIds,
+            adminNames: data.adminNames,
             createdAt: FieldValue.serverTimestamp(),
         });
 
         revalidatePath("/superadmin/locations");
         revalidatePath("/reports/new");
-        return { success: true };
+        return { success: true, id: docRef.id };
     } catch (error) {
         console.error("Error creating location:", error);
         return { success: false, error: "Gagal membuat lokasi" };
     }
 }
 
-export async function updateLocation(id: string, data: { name: string; adminId: string | null; adminName: string | null }) {
+export async function updateLocation(id: string, data: { name: string; adminIds: string[]; adminNames: string[] }) {
     const session = await auth();
     if (session?.user?.role !== "superadmin") {
         return { success: false, error: "Unauthorized" };
@@ -38,8 +40,8 @@ export async function updateLocation(id: string, data: { name: string; adminId: 
     try {
         await adminDb.collection("locations").doc(id).update({
             name: data.name,
-            adminId: data.adminId,
-            adminName: data.adminName,
+            adminIds: data.adminIds,
+            adminNames: data.adminNames,
         });
 
         revalidatePath("/superadmin/locations");
@@ -69,8 +71,6 @@ export async function deleteLocation(id: string) {
     }
 }
 
-import { LocationDocument } from "@/types";
-
 export async function getLocations(): Promise<LocationDocument[]> {
     try {
         const snapshot = await adminDb.collection("locations").orderBy("createdAt", "asc").get();
@@ -78,9 +78,11 @@ export async function getLocations(): Promise<LocationDocument[]> {
             const data = doc.data();
             return {
                 id: doc.id,
-                ...data,
+                name: data.name,
+                // Support both old (single admin) and new (multi admin) format
+                adminIds: data.adminIds || (data.adminId ? [data.adminId] : []),
+                adminNames: data.adminNames || (data.adminName ? [data.adminName] : []),
                 createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
-                updatedAt: data.updatedAt?.toDate?.()?.toISOString() || null
             } as unknown as LocationDocument;
         });
     } catch (error) {

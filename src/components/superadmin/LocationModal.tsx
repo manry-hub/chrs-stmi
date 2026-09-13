@@ -6,7 +6,7 @@ import { LocationDocument, UserDocument } from "@/types";
 interface LocationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { id: string; name: string; adminId: string }) => Promise<void>;
+  onSubmit: (data: { name: string; adminIds: string[] }) => Promise<void>;
   isSubmitting: boolean;
   admins: UserDocument[];
   editingLocation?: LocationDocument | null;
@@ -20,20 +20,17 @@ export function LocationModal({
   admins,
   editingLocation,
 }: LocationModalProps) {
-  const [newId, setNewId] = useState("");
   const [newName, setNewName] = useState("");
-  const [newAdminId, setNewAdminId] = useState("");
+  const [selectedAdminIds, setSelectedAdminIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen) {
       if (editingLocation) {
-        setNewId(editingLocation.id);
         setNewName(editingLocation.name);
-        setNewAdminId(editingLocation.adminId || "");
+        setSelectedAdminIds(editingLocation.adminIds || []);
       } else {
-        setNewId("");
         setNewName("");
-        setNewAdminId("");
+        setSelectedAdminIds([]);
       }
     }
   }, [isOpen, editingLocation]);
@@ -42,7 +39,15 @@ export function LocationModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit({ id: newId, name: newName, adminId: newAdminId });
+    await onSubmit({ name: newName, adminIds: selectedAdminIds });
+  };
+
+  const toggleAdmin = (adminId: string) => {
+    setSelectedAdminIds(prev =>
+      prev.includes(adminId)
+        ? prev.filter(id => id !== adminId)
+        : [...prev, adminId]
+    );
   };
 
   return (
@@ -61,25 +66,6 @@ export function LocationModal({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 flex-1 overflow-y-auto space-y-4">
-          {!editingLocation && (
-            <div>
-              <Label htmlFor="id" className="mb-1 block text-sm">
-                ID Unik (slug)
-              </Label>
-              <input
-                id="id"
-                type="text"
-                value={newId}
-                onChange={(e) => setNewId(e.target.value)}
-                placeholder="contoh: gedung-a-lantai-1"
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Tanpa spasi, gunakan huruf kecil dan strip.
-              </p>
-            </div>
-          )}
           <div>
             <Label htmlFor="name" className="mb-1 block text-sm">
               Nama Lokasi
@@ -95,22 +81,37 @@ export function LocationModal({
             />
           </div>
           <div>
-            <Label htmlFor="admin" className="mb-1 block text-sm">
-              Penanggung Jawab (Admin)
+            <Label className="mb-2 block text-sm">
+              Penanggung Jawab (Cleaning Service)
             </Label>
-            <select
-              id="admin"
-              value={newAdminId}
-              onChange={(e) => setNewAdminId(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="">-- Pilih Admin (Opsional) --</option>
-              {admins.map((admin) => (
-                <option key={admin.id} value={admin.id}>
-                  {admin.name} ({admin.email})
-                </option>
-              ))}
-            </select>
+            {admins.length === 0 ? (
+              <p className="text-sm text-slate-400 italic">Belum ada admin terdaftar.</p>
+            ) : (
+              <div className="space-y-2 max-h-48 overflow-y-auto border border-slate-200 rounded-md p-3">
+                {admins.map((admin) => (
+                  <label
+                    key={admin.id}
+                    className="flex items-center gap-3 p-2 rounded-md hover:bg-slate-50 cursor-pointer transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedAdminIds.includes(admin.id)}
+                      onChange={() => toggleAdmin(admin.id)}
+                      className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-slate-800 truncate">{admin.name}</p>
+                      <p className="text-xs text-slate-500 truncate">{admin.email}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+            {selectedAdminIds.length > 0 && (
+              <p className="text-xs text-slate-500 mt-2">
+                {selectedAdminIds.length} penanggung jawab dipilih
+              </p>
+            )}
           </div>
 
           <div className="pt-4 flex gap-3 justify-end">

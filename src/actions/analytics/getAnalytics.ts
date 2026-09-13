@@ -3,13 +3,21 @@
 import { auth } from "@/lib/auth";
 import { adminDb } from "@/lib/firebase/admin";
 import { HAZARD_TYPES } from "@/constants";
+import { DateFilterRange, isWithinDateRange } from "@/lib/utils";
 
-export async function getAnalytics() {
+export async function getAnalytics(dateFilter: DateFilterRange = "hari") {
   const session = await auth();
   if (session?.user.role !== "superadmin") throw new Error("Unauthorized");
 
   const reportsSnap = await adminDb.collection("reports").get();
-  const reports = reportsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  
+  // Filter by date first
+  const reports = reportsSnap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .filter((r: any) => {
+        const dateStr = r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000) : null;
+        return isWithinDateRange(dateStr, dateFilter);
+    });
 
   const total = reports.length;
   const pending = reports.filter((r: any) => r.status === "pending").length;
@@ -51,7 +59,13 @@ export async function getAnalytics() {
   const responseTimes: number[] = [];
 
   for (const doc of reportsSnap.docs) {
-    if (doc.data().status !== "confirmed" && doc.data().status !== "done") continue;
+    const data = doc.data();
+    if (data.status !== "confirmed" && data.status !== "done") continue;
+    
+    // Check if this document falls into our date range
+    const docDate = data.createdAt?.seconds ? new Date(data.createdAt.seconds * 1000) : null;
+    if (!isWithinDateRange(docDate, dateFilter)) continue;
+
     const logsSnap = await adminDb
       .collection("reports")
       .doc(doc.id)

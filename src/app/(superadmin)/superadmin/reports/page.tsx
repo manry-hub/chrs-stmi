@@ -3,13 +3,16 @@
 import { useEffect, useState } from "react";
 import { subscribeToAllReportsAdmin } from "@/lib/firebase/reports";
 import { ReportTable } from "@/components/admin/ReportTable";
-import { ReportFilterBar } from "@/components/admin/ReportFilterBar";
-import type { ReportDocument, ReportStatus } from "@/types";
-import { Loader2 } from "lucide-react";
+import { DateFilterBar } from "@/components/admin/DateFilterBar";
+import type { ReportDocument } from "@/types";
+import { Loader2, Plus, PlusCircle } from "lucide-react";
+import { DateFilterRange, isWithinDateRange } from "@/lib/utils";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 
 export default function SuperadminReportsPage() {
     const [reports, setReports] = useState<ReportDocument[]>([]);
-    const [filter, setFilter] = useState<ReportStatus | "all">("all");
+    const [dateFilter, setDateFilter] = useState<DateFilterRange>("hari");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -28,18 +31,29 @@ export default function SuperadminReportsPage() {
         return unsub;
     }, []);
 
-    const filtered = filter === "all" ? reports : reports.filter((r) => r.status === filter);
+    const filtered = reports.filter((r) => {
+        return isWithinDateRange(r.createdAt as any, dateFilter);
+    });
 
     return (
         <div className="space-y-6">
             {/* Page Header */}
-            <div>
-                <h1 className="text-2xl font-bold text-slate-900">Manajemen Laporan</h1>
-                <p className="text-sm text-slate-500 mt-1">Pantau seluruh laporan bahaya dari semua pengguna secara real-time.</p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-900">Manajemen Laporan</h1>
+                    <p className="text-sm text-slate-500 mt-1">Pantau seluruh laporan bahaya dari semua pengguna secara real-time.</p>
+                </div>
             </div>
 
             {/* Filter */}
-            <ReportFilterBar value={filter} onChange={setFilter} />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                
+                <Button className="shadow-lg shadow-blue-500/20">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Tambah Laporan
+                </Button>
+                <DateFilterBar value={dateFilter} onChange={setDateFilter} />
+            </div>
 
             {/* Report Table or Loading */}
             {loading ? (

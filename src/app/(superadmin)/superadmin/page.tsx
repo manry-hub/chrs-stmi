@@ -2,11 +2,20 @@ import { getAnalytics } from "@/actions/analytics/getAnalytics";
 import { getAdminPerformance } from "@/actions/admin/performance";
 import { FileText, AlertTriangle, CheckCircle, Clock, ClipboardList } from "lucide-react";
 import { SuperadminCharts } from "@/components/superadmin/SuperadminCharts";
+import { DashboardDateFilter } from "@/components/superadmin/DashboardDateFilter";
+import { DateFilterRange } from "@/lib/utils";
 
-export default async function SuperadminDashboard() {
+interface PageProps {
+  searchParams: Promise<{ date?: string }>;
+}
+
+export default async function SuperadminDashboard({ searchParams }: PageProps) {
+  const { date } = await searchParams;
+  const dateFilter = (date as DateFilterRange) || "hari";
+
   const [{ total, pending, confirmed, done, avgResponseMinutes, topSources, pendingList }, performances] = await Promise.all([
-    getAnalytics(),
-    getAdminPerformance()
+    getAnalytics(dateFilter),
+    getAdminPerformance(dateFilter)
   ]);
 
   // Calculate totals for admin performance
@@ -17,11 +26,14 @@ export default async function SuperadminDashboard() {
   return (
     <div className="space-y-8 pb-8">
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard Analytics</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Ringkasan statistik keseluruhan sistem pelaporan dan performa cleaning service.
-        </p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard Analytics</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Ringkasan statistik keseluruhan sistem pelaporan dan performa cleaning service.
+          </p>
+        </div>
+        <DashboardDateFilter />
       </div>
 
       {/* Top Metrics */}
@@ -37,36 +49,37 @@ export default async function SuperadminDashboard() {
               <ClipboardList className="w-5 h-5 text-blue-600" />
             </div>
           </div>
-          <div className="mt-auto">
-            <p className="text-xs text-slate-500 font-medium">Keseluruhan laporan masuk</p>
-          </div>
+         
         </div>
 
-        {/* Tingkat Penyelesaian */}
+        {/* Menunggu (PENDING -> RED) */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Laporan Menunggu</p>
+              <h3 className="text-3xl font-bold text-red-500">{pending}</h3>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+            </div>
+          </div>
+         
+        </div>
+
+        {/* Tingkat Penyelesaian (CONFIRMED -> YELLOW) */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start mb-4">
             <div>
               <p className="text-sm font-medium text-slate-500 mb-1">Penyelesaian</p>
-              <h3 className="text-3xl font-bold text-emerald-600">
-                {total > 0 ? ((confirmed / total) * 100).toFixed(1) : "0"}%
+              <h3 className="text-3xl font-bold text-yellow-600">
+                {total > 0 ? ((done / total) * 100).toFixed(1) : "0"}%
               </h3>
             </div>
-            <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-              <CheckCircle className="w-5 h-5 text-emerald-600" />
+            <div className="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center shrink-0">
+              <CheckCircle className="w-5 h-5 text-yellow-600" />
             </div>
           </div>
-          <div className="mt-auto">
-            <div className="flex justify-between text-xs text-slate-500 font-medium mb-2">
-              <span>{confirmed} selesai</span>
-              <span>dari {total}</span>
-            </div>
-            <div className="w-full bg-slate-100 rounded-full h-1.5">
-              <div
-                className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500"
-                style={{ width: `${total > 0 ? (confirmed / total) * 100 : 0}%` }}
-              />
-            </div>
-          </div>
+        
         </div>
 
        
@@ -74,18 +87,16 @@ export default async function SuperadminDashboard() {
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500 mb-1">Rata-rata Respons</p>
+              <p className="text-sm font-medium text-slate-500 mb-1">Rata-rata Respons per laporan</p>
               <h3 className="text-3xl font-bold text-purple-600">
-                {avgResponseMinutes !== null ? avgResponseMinutes.toFixed(1) : "-"}
+                {avgResponseMinutes !== null ? avgResponseMinutes.toFixed(1) : "-"} menit
               </h3>
             </div>
             <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
               <Clock className="w-5 h-5 text-purple-600" />
             </div>
           </div>
-          <div className="mt-auto">
-            <p className="text-xs text-slate-500 font-medium">{avgResponseMinutes !== null ? 'Menit per laporan' : 'Belum ada data'}</p>
-          </div>
+          
         </div>
       </div>
 
@@ -111,10 +122,10 @@ export default async function SuperadminDashboard() {
                     <tr>
                         <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Nama Cleaning Service</th>
                         <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider">Lokasi Tanggung Jawab</th>
-                        <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-center">Ditugaskan</th>
-                        <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-center">Pending</th>
-                        <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-center">Selesai</th>
-                        <th className="px-6 py-4 font-semibold text-xs uppercase tracking-wider text-center">Rata-rata Respons</th>
+                        <th className="px-3 py-4 font-semibold text-xs uppercase tracking-wider text-center w-24">Ditugaskan</th>
+                        <th className="px-3 py-4 font-semibold text-xs uppercase tracking-wider text-center w-24">Pending</th>
+                        <th className="px-3 py-4 font-semibold text-xs uppercase tracking-wider text-center w-24">Selesai</th>
+                        <th className="px-3 py-4 font-semibold text-xs uppercase tracking-wider text-center w-36">Rata-rata Respons</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -147,16 +158,16 @@ export default async function SuperadminDashboard() {
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-center font-semibold text-slate-700">
+                                    <td className="px-3 py-4 text-center font-semibold text-slate-700">
                                         {perf.totalAssigned}
                                     </td>
-                                    <td className="px-6 py-4 text-center font-bold text-amber-500">
+                                    <td className="px-3 py-4 text-center font-bold text-red-500">
                                         {perf.totalPending}
                                     </td>
-                                    <td className="px-6 py-4 text-center font-bold text-emerald-600">
+                                    <td className="px-3 py-4 text-center font-bold text-green-600">
                                         {perf.totalDone}
                                     </td>
-                                    <td className="px-6 py-4 text-center">
+                                    <td className="px-3 py-4 text-center">
                                         {perf.avgResponseMinutes !== null ? (
                                             <div className="flex flex-col items-center justify-center">
                                                 <span className="text-xl font-bold text-purple-600">{perf.avgResponseMinutes.toFixed(1)}</span>

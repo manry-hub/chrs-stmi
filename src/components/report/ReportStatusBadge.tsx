@@ -5,15 +5,15 @@ import { REPORT_STATUS } from "@/constants";
 const STATUS_CONFIG: Record<ReportStatus, { label: string; className: string }> = {
   [REPORT_STATUS.PENDING]: {
     label: "Belum Dikonfirmasi",
-    className: "bg-yellow-100 text-yellow-800",
+    className: "bg-red-100 text-red-800",
   },
   [REPORT_STATUS.CONFIRMED]: {
     label: "Dikonfirmasi",
-    className: "bg-green-100 text-green-800",
+    className: "bg-yellow-100 text-yellow-800",
   },
   [REPORT_STATUS.DONE]: {
     label: "Selesai",
-    className: "bg-purple-100 text-purple-800",
+    className: "bg-green-100 text-green-800",
   },
 };
 

@@ -18,25 +18,25 @@ export function HazardTypeClient({ initialData }: HazardTypeClientProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingHazard, setEditingHazard] = useState<HazardTypeDocument | null>(null);
 
-    const handleSubmit = async (id: string, name: string) => {
-        if (!id || !name) return;
+    const handleSubmit = async (data: { id?: string; name: string }) => {
+        if (!data.name) return;
         setIsSubmitting(true);
 
         try {
-            if (editingHazard) {
-                const res = await updateHazardType(id, { name });
+            if (editingHazard && data.id) {
+                const res = await updateHazardType(data.id, { name: data.name });
                 if (res.success) {
                     toast.success("Kategori bahaya berhasil diupdate");
-                    setHazardTypes(prev => prev.map(h => h.id === id ? { ...h, name } : h));
+                    setHazardTypes(prev => prev.map(h => h.id === data.id ? { ...h, name: data.name } : h));
                     setIsModalOpen(false);
                 } else {
                     toast.error(res.error || "Gagal mengupdate kategori");
                 }
             } else {
-                const res = await createHazardType({ id, name });
+                const res = await createHazardType({ name: data.name });
                 if (res.success) {
                     toast.success("Kategori bahaya berhasil ditambahkan");
-                    setHazardTypes(prev => [...prev, { id: id.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase(), name, createdAt: {} as any }]);
+                    setHazardTypes(prev => [...prev, { id: res.id || crypto.randomUUID(), name: data.name, createdAt: {} as any }]);
                     setIsModalOpen(false);
                 } else {
                     toast.error(res.error || "Gagal menambahkan kategori");
@@ -96,7 +96,6 @@ export function HazardTypeClient({ initialData }: HazardTypeClientProps) {
                         <table className="w-full text-left text-sm text-slate-600">
                             <thead className="bg-slate-50/70 border-b border-slate-100 text-slate-800">
                                 <tr>
-                                    <th className="px-6 py-4 font-semibold text-slate-600">ID</th>
                                     <th className="px-6 py-4 font-semibold text-slate-600">Nama Kategori</th>
                                     <th className="px-6 py-4 font-semibold text-right text-slate-600">Aksi</th>
                                 </tr>
@@ -104,7 +103,6 @@ export function HazardTypeClient({ initialData }: HazardTypeClientProps) {
                             <tbody className="divide-y divide-slate-100">
                                 {hazardTypes.map((hazard) => (
                                     <tr key={hazard.id} className="hover:bg-blue-50/30 transition-colors duration-150">
-                                        <td className="px-6 py-4 font-mono text-xs">{hazard.id}</td>
                                         <td className="px-6 py-4 font-medium text-slate-900">{hazard.name}</td>
                                         <td className="px-6 py-4 text-right space-x-2">
                                             <button

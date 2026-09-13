@@ -32,7 +32,7 @@ export function SuperadminCharts({ total, pendingList, topSources }: SuperadminC
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-sm font-semibold text-slate-700">Laporan Menunggu Tindakan</h3>
                     {pendingList.length > 0 && (
-                        <span className="text-xs font-medium bg-amber-100 text-amber-700 px-2 py-1 rounded-full">{pendingList.length} terbaru</span>
+                        <span className="text-xs font-medium bg-red-100 text-red-700 px-2 py-1 rounded-full">{pendingList.length} terbaru</span>
                     )}
                 </div>
                 

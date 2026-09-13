@@ -179,7 +179,7 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
                         <div className="flex items-start gap-2">
                             <MessageSquare className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
                             <div>
-                                <p className="text-xs text-amber-700 font-medium mb-1">Pesan Tambahan</p>
+                                <p className="text-xs text-amber-700 font-medium mb-1">Detail lokasi atau deskripsi</p>
                                 <p className="text-sm text-amber-800">{report.additionalMessage}</p>
                             </div>
                         </div>
@@ -209,7 +209,7 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
                 {/* Confirm Button */}
                 {currentStatus === "pending" && (
                     <div className="mt-6 pt-4 border-t border-slate-200">
-                        <Button onClick={handleConfirm} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white gap-2">
+                        <Button onClick={handleConfirm} disabled={loading} className="bg-yellow-600 hover:bg-yellow-700 text-white gap-2">
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                             {loading ? "Mengkonfirmasi..." : "Konfirmasi Laporan"}
                         </Button>
@@ -219,7 +219,7 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
                 {/* Complete Button */}
                 {currentStatus === "confirmed" && (
                     <div className="mt-6 pt-4 border-t border-slate-200">
-                        <Button onClick={handleDone} disabled={loading} className="bg-purple-600 hover:bg-purple-700 text-white gap-2">
+                        <Button onClick={handleDone} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white gap-2">
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                             {loading ? "Menyelesaikan..." : "Selesaikan Laporan"}
                         </Button>
@@ -227,11 +227,7 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
                 )}
             </div>
 
-            {/* Activity Log */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-                <h2 className="text-lg font-bold text-slate-900 mb-4">Riwayat Aktivitas</h2>
-                <ActivityLogTimeline logs={logs} />
-            </div>
+           
         </div>
     );
 }

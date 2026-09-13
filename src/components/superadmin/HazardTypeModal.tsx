@@ -6,7 +6,7 @@ import { HazardTypeDocument } from "@/types";
 interface HazardTypeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (id: string, name: string) => Promise<void>;
+  onSubmit: (data: { id?: string; name: string }) => Promise<void>;
   isSubmitting: boolean;
   editingHazard?: HazardTypeDocument | null;
 }
@@ -18,16 +18,13 @@ export function HazardTypeModal({
   isSubmitting,
   editingHazard,
 }: HazardTypeModalProps) {
-  const [newId, setNewId] = useState("");
   const [newName, setNewName] = useState("");
 
   useEffect(() => {
     if (isOpen) {
       if (editingHazard) {
-        setNewId(editingHazard.id);
         setNewName(editingHazard.name);
       } else {
-        setNewId("");
         setNewName("");
       }
     }
@@ -37,7 +34,7 @@ export function HazardTypeModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit(newId, newName);
+    await onSubmit({ id: editingHazard?.id, name: newName });
   };
 
   return (
@@ -56,25 +53,7 @@ export function HazardTypeModal({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 flex-1 overflow-y-auto space-y-4">
-          {!editingHazard && (
-            <div>
-              <Label htmlFor="id" className="mb-1 block text-sm">
-                ID Unik (slug)
-              </Label>
-              <input
-                id="id"
-                type="text"
-                value={newId}
-                onChange={(e) => setNewId(e.target.value)}
-                placeholder="contoh: lantai-licin"
-                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Tanpa spasi, gunakan huruf kecil dan strip.
-              </p>
-            </div>
-          )}
+
           <div>
             <Label htmlFor="name" className="mb-1 block text-sm">
               Nama Kategori (Label)

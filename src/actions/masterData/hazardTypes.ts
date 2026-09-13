@@ -5,22 +5,22 @@ import { FieldValue } from "firebase-admin/firestore";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 
-export async function createHazardType(data: { id: string; name: string }) {
+export async function createHazardType(data: { name: string }) {
     const session = await auth();
     if (session?.user?.role !== "superadmin") {
         return { success: false, error: "Unauthorized" };
     }
 
     try {
-        const id = data.id.replace(/[^a-zA-Z0-9-]/g, "-").toLowerCase();
-        await adminDb.collection("hazardTypes").doc(id).set({
+        const docRef = adminDb.collection("hazardTypes").doc();
+        await docRef.set({
             name: data.name,
             createdAt: FieldValue.serverTimestamp(),
         });
 
         revalidatePath("/superadmin/hazard-types");
         revalidatePath("/reports/new");
-        return { success: true };
+        return { success: true, id: docRef.id };
     } catch (error) {
         console.error("Error creating hazard type:", error);
         return { success: false, error: "Gagal membuat jenis bahaya" };

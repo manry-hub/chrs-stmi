@@ -9,7 +9,7 @@ import { sendPushToAdmins } from "@/lib/notifications/sendPushToAdmins";
 
 export async function submitReport(formData: unknown) {
   const session = await auth();
-  if (!session || session.user.role !== "user") {
+  if (!session?.user?.role) {
     throw new Error("Sesi tidak valid atau Anda tidak memiliki akses. Silakan login kembali.");
   }
 

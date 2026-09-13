@@ -22,7 +22,7 @@ export function LocationPicker({ onLocationChange, error, nameError, locations, 
                 onLocationChange({
                     name: loc.name,
                     locationId: loc.id,
-                    assignedAdminId: loc.adminId || undefined
+                    assignedAdminId: loc.adminIds?.[0] || undefined
                 });
             }
         }
@@ -37,7 +37,7 @@ export function LocationPicker({ onLocationChange, error, nameError, locations, 
             onLocationChange({
                 name: loc.name,
                 locationId: loc.id,
-                assignedAdminId: loc.adminId || undefined
+                assignedAdminId: loc.adminIds?.[0] || undefined
             });
         } else {
             onLocationChange({ name: "" });

@@ -1,21 +1,19 @@
-"use client";
-
-import type { ReportStatus } from "@/types";
+import { DateFilterRange } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
-interface ReportFilterBarProps {
-  value: ReportStatus | "all";
-  onChange: (value: ReportStatus | "all") => void;
+interface DateFilterBarProps {
+  value: DateFilterRange;
+  onChange: (value: DateFilterRange) => void;
 }
 
-const FILTERS: { value: ReportStatus | "all"; label: string }[] = [
-  { value: "all", label: "Semua" },
-  { value: "pending", label: "Belum Dikonfirmasi" },
-  { value: "confirmed", label: "Dikonfirmasi" },
-  { value: "done", label: "Selesai" },
+const FILTERS: { value: DateFilterRange; label: string }[] = [
+  { value: "hari", label: "Hari Ini" },
+  { value: "bulan", label: "Bulan Ini" },
+  { value: "tahun", label: "Tahun Ini" },
+  { value: "semua", label: "Semua Waktu" },
 ];
 
-export function ReportFilterBar({ value, onChange }: ReportFilterBarProps) {
+export function DateFilterBar({ value, onChange }: DateFilterBarProps) {
   return (
     <div className="flex bg-slate-100 p-1 rounded-lg w-fit overflow-x-auto mb-6">
       {FILTERS.map((f) => (
