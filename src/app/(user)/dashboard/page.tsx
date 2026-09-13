@@ -1,5 +1,4 @@
 import { ReportSubmitForm } from "@/components/report/ReportSubmitForm";
-import { PlusCircle } from "lucide-react";
 import { getLocations } from "@/actions/masterData/locations";
 import { getHazardTypes } from "@/actions/masterData/hazardTypes";
 

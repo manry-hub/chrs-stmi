@@ -4,9 +4,9 @@ import { useState } from "react";
 import { LocationDocument, UserDocument } from "@/types";
 import { createLocation, updateLocation, deleteLocation } from "@/actions/masterData/locations";
 import { Button } from "../ui/Button";
-import { Trash2, Plus, Edit2, QrCode, MapPin } from "lucide-react";
+import { Trash2, Plus, Edit2, QrCode, MapPin, Download } from "lucide-react";
 import toast from "react-hot-toast";
-import { QRCodeSVG } from "qrcode.react";
+import { QRCodeCanvas } from "qrcode.react";
 import { LocationModal } from "./LocationModal";
 
 interface LocationClientProps {
@@ -83,7 +83,31 @@ export function LocationClient({ initialData, admins }: LocationClientProps) {
 
     const getReportUrl = (locId: string) => {
         if (typeof window === "undefined") return "";
-        return `${window.location.origin}/reports/new?loc=${locId}`;
+        return `${window.location.origin}/dashboard?loc=${locId}`;
+    };
+
+    const handleDownloadQR = () => {
+        const canvas = document.getElementById("qr-canvas") as HTMLCanvasElement;
+        if (!canvas) return;
+
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = canvas.width;
+        tempCanvas.height = canvas.height;
+        const ctx = tempCanvas.getContext("2d");
+        if (ctx) {
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            ctx.drawImage(canvas, 0, 0);
+            
+            const jpgUrl = tempCanvas.toDataURL("image/jpeg");
+            const downloadLink = document.createElement("a");
+            downloadLink.href = jpgUrl;
+            downloadLink.download = `QR_Lokasi_${showQR}.jpg`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            toast.success("QR Code berhasil diunduh");
+        }
     };
 
     return (
@@ -172,16 +196,15 @@ export function LocationClient({ initialData, admins }: LocationClientProps) {
                         </p>
                         
                         <div className="flex justify-center bg-white p-4 rounded-lg border border-slate-100 mb-6 inline-block">
-                            <QRCodeSVG value={getReportUrl(showQR)} size={200} level="H" includeMargin />
+                            <QRCodeCanvas id="qr-canvas" value={getReportUrl(showQR)} size={200} level="H" includeMargin />
                         </div>
                         
                         <div className="space-y-3">
-                            <Button className="w-full" onClick={() => {
-                                navigator.clipboard.writeText(getReportUrl(showQR));
-                                toast.success("URL disalin!");
-                            }}>
-                                Salin URL
+                            <Button className="w-full bg-green-600 hover:bg-green-700 text-white" onClick={handleDownloadQR}>
+                                <Download className="w-4 h-4 mr-2" />
+                                Export ke JPG
                             </Button>
+                           
                             <Button variant="outline" className="w-full" onClick={() => setShowQR(null)}>
                                 Tutup
                             </Button>

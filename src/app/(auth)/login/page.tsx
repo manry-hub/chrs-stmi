@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn, getSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { loginSchema, LoginInput } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/Button";
@@ -13,14 +13,15 @@ import { Label } from "@/components/ui/Label";
 import { ROUTES } from "@/constants";
 
 /** Determine the correct landing page based on user role */
-function getRedirectPath(role?: string): string {
+function getRedirectPath(role?: string, loc?: string | null): string {
     switch (role) {
         case "superadmin":
             return "/superadmin";
         case "admin":
             return "/admin";
         default:
-            return ROUTES.DASHBOARD;
+            // If there's a loc param from QR Code, redirect to dashboard with it
+            return loc ? `${ROUTES.DASHBOARD}?loc=${loc}` : ROUTES.DASHBOARD;
     }
 }
 
@@ -28,6 +29,8 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const loc = searchParams.get("loc");
 
     const {
         register,
@@ -52,9 +55,8 @@ export default function LoginPage() {
             } else {
                 // Fetch fresh session to get role, then redirect accordingly
                 const session = await getSession();
-                const redirectPath = getRedirectPath(session?.user?.role);
+                const redirectPath = getRedirectPath(session?.user?.role, loc);
                 router.push(redirectPath);
-                router.refresh();
             }
         } catch (err) {
             setError("Terjadi kesalahan sistem");
@@ -62,6 +64,9 @@ export default function LoginPage() {
             setIsLoading(false);
         }
     };
+
+    // Build register link with loc param preserved
+    const registerHref = loc ? `${ROUTES.REGISTER}?loc=${loc}` : ROUTES.REGISTER;
 
     return (
         <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-100">
@@ -92,7 +97,7 @@ export default function LoginPage() {
 
             <p className="mt-6 text-center text-sm text-slate-600">
                 Belum punya akun?{" "}
-                <Link href={ROUTES.REGISTER} className="text-blue-600 hover:underline">
+                <Link href={registerHref} className="text-blue-600 hover:underline">
                     Daftar sekarang
                 </Link>
             </p>

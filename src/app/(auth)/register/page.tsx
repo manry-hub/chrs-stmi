@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { registerSchema, RegisterInput } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +16,8 @@ export default function RegisterPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const loc = searchParams.get("loc");
 
     const {
         register,
@@ -31,7 +33,9 @@ export default function RegisterPage() {
         try {
             const res = await registerUser(data);
             if (res.success) {
-                router.push(ROUTES.LOGIN);
+                // Preserve loc param through to login page
+                const loginPath = loc ? `${ROUTES.LOGIN}?loc=${loc}` : ROUTES.LOGIN;
+                router.push(loginPath);
             }
         } catch (err) {
             if (err instanceof Error) {
@@ -43,6 +47,9 @@ export default function RegisterPage() {
             setIsLoading(false);
         }
     };
+
+    // Build login link with loc param preserved
+    const loginHref = loc ? `${ROUTES.LOGIN}?loc=${loc}` : ROUTES.LOGIN;
 
     return (
         <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-100">
@@ -91,7 +98,7 @@ export default function RegisterPage() {
 
             <p className="mt-6 text-center text-sm text-slate-600">
                 Sudah punya akun?{" "}
-                <Link href={ROUTES.LOGIN} className="text-blue-600 hover:underline">
+                <Link href={loginHref} className="text-blue-600 hover:underline">
                     Masuk di sini
                 </Link>
             </p>
