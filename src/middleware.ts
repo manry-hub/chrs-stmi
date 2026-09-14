@@ -4,8 +4,25 @@ import { NextResponse } from "next/server";
 
 export const { auth } = NextAuth(authConfig);
 
+import { rateLimit } from "@/lib/rateLimit";
+
 export default auth((req) => {
     const { pathname, searchParams } = req.nextUrl;
+    
+    // Simple in-memory rate limiting for sensitive endpoints
+    // Note: State is per-isolate in Edge/Serverless environments
+    if (pathname.startsWith("/api/auth/") || pathname === "/api/upload") {
+        // Using x-forwarded-for as req.ip is not available on NextAuthRequest type
+        const ip = req.headers.get("x-forwarded-for") || "unknown";
+        const limit = pathname === "/api/upload" ? 10 : 5; // 10 uploads/min, 5 auth attempts/15min
+        const windowMs = pathname === "/api/upload" ? 60000 : 900000;
+        
+        const { success } = rateLimit(ip, limit, windowMs);
+        if (!success) {
+            return new NextResponse("Too Many Requests", { status: 429 });
+        }
+    }
+
     const loc = searchParams.get("loc");
     const isLoggedIn = !!req.auth;
     const role = req.auth?.user?.role;

@@ -17,7 +17,7 @@ export async function submitReport(formData: unknown) {
     throw new Error("ID Pengguna tidak ditemukan dalam sesi. Silakan logout dan login kembali untuk menyegarkan sesi Anda.");
   }
 
-  console.log("SubmitReport Input:", JSON.stringify(formData, null, 2));
+  // Data submission removed from console logs to prevent sensitive data leakage
   const data = submitReportSchema.parse(formData);
 
   if (data.draftId) {
