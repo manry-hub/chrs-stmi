@@ -46,11 +46,14 @@ export function PushNotificationToggle() {
 
   async function checkAndAutoSubscribe() {
     try {
-      const registration = await navigator.serviceWorker.getRegistration();
+      let registration = await navigator.serviceWorker.getRegistration();
       if (!registration) {
         setLoading(false);
         return;
       }
+      
+      // Ensure service worker is active before interacting with pushManager
+      registration = await navigator.serviceWorker.ready;
       
       const subscription = await registration.pushManager.getSubscription();
       const hasSubscribed = !!subscription;
@@ -131,6 +134,10 @@ export function PushNotificationToggle() {
         if (!registration) {
            registration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
         }
+        
+        // Ensure service worker is active before interacting with pushManager
+        registration = await navigator.serviceWorker.ready;
+        
         await handleSubscribe(registration);
       }
     } catch (error) {

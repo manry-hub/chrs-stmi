@@ -17,13 +17,13 @@ const FILTERS: { value: DateFilterRange; label: string }[] = [
 export function DateFilterBar({ value, onChange }: DateFilterBarProps) {
   return (
     <div className="relative group w-fit">
-      <div className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500 group-hover:text-slate-700 transition-colors z-10">
-        <Calendar className="h-4.5 w-4.5" />
+      <div className="absolute inset-y-0 left-0 flex items-center pl-2.5 sm:pl-3.5 pointer-events-none text-slate-500 group-hover:text-slate-700 transition-colors z-10">
+        <Calendar className="h-3.5 w-3.5 sm:h-4.5 sm:w-4.5" />
       </div>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value as DateFilterRange)}
-        className="flex h-[42px] appearance-none rounded-xl border border-slate-200 bg-white pl-11 pr-10 py-2 text-sm font-medium text-slate-700 hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all cursor-pointer shadow-sm"
+        className="flex h-8 sm:h-[42px] appearance-none rounded-lg sm:rounded-xl border border-slate-200 bg-white pl-8 pr-7 py-1 sm:pl-11 sm:pr-10 sm:py-2 text-[11px] sm:text-sm font-medium text-slate-700 hover:border-slate-300 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all cursor-pointer shadow-sm"
       >
         {FILTERS.map((f) => (
           <option key={f.value} value={f.value}>
@@ -31,8 +31,8 @@ export function DateFilterBar({ value, onChange }: DateFilterBarProps) {
           </option>
         ))}
       </select>
-      <div className="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-slate-400 group-hover:text-slate-600 transition-colors z-10">
-        <ChevronDown className="h-4 w-4" />
+      <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 sm:pr-3.5 pointer-events-none text-slate-400 group-hover:text-slate-600 transition-colors z-10">
+        <ChevronDown className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
       </div>
     </div>
   );

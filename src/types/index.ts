@@ -41,6 +41,7 @@ export interface ReportDocument {
     description: string;
     locationId?: string;       // New field for dynamic location
     assignedAdminId?: string;  // New field for admin tracking
+    confirmedBy?: string;      // New field for tracking who confirmed the report
     location: ReportLocation;
     additionalMessage?: string;
     status: ReportStatus;

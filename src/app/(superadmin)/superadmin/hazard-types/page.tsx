@@ -14,8 +14,8 @@ export default async function HazardTypesPage() {
             <div className="flex items-center gap-4">
                
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Manajemen Kategori Bahaya</h1>
-                    <p className="text-sm text-slate-500 mt-1">Kelola jenis-jenis sumber potensi bahaya yang dapat dipilih oleh pelapor.</p>
+                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Manajemen Kategori Bahaya</h1>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-1">Kelola jenis-jenis sumber potensi bahaya yang dapat dipilih oleh pelapor.</p>
                 </div>
             </div>
 

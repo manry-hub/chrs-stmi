@@ -41,86 +41,87 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6 pb-12">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard Tugas</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Pantau dan tindak lanjuti laporan bahaya yang membutuhkan perhatian segera.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-            <div className="flex bg-slate-100 p-1 rounded-lg shrink-0">
+      <div className="mb-2 sm:mb-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Dashboard Tugas</h1>
+        <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          Pantau dan tindak lanjuti laporan bahaya yang membutuhkan perhatian segera.
+        </p>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-row items-center justify-between gap-2 sm:gap-4 mb-4 overflow-x-auto pb-1 sm:pb-0">
+        <div className="shrink-0">
+          <div className="flex bg-slate-100 p-1 rounded-lg">
             <button
                 onClick={() => setViewMode("my-locations")}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewMode === "my-locations" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-sm font-medium rounded-md transition-colors ${viewMode === "my-locations" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
                 Lokasi Saya
             </button>
             <button
                 onClick={() => setViewMode("all")}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewMode === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                className={`px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-sm font-medium rounded-md transition-colors ${viewMode === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
                 Semua Lokasi
             </button>
+          </div>
         </div>
-        </div>
-      </div>
 
-      {/* Filter */}
-      <div className="flex justify-end mb-4">
-        <DateFilterBar value={dateFilter} onChange={setDateFilter} />
+        <div className="flex justify-end shrink-0">
+          <DateFilterBar value={dateFilter} onChange={setDateFilter} />
+        </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {/* Total Laporan */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div className="flex flex-col-reverse sm:flex-row justify-between items-start gap-2 mb-2 sm:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500 mb-1">Total Laporan</p>
-              <h3 className="text-3xl font-bold text-slate-900">{totalReports}</h3>
+              <p className="text-xs sm:text-sm font-medium text-slate-500 mb-1">Total Laporan</p>
+              <h3 className="text-2xl sm:text-3xl font-bold text-slate-900">{totalReports}</h3>
             </div>
-            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-              <ClipboardList className="w-5 h-5 text-blue-600" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
+              <ClipboardList className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
             </div>
           </div>
         </div>
 
         {/* Menunggu (PENDING -> RED) */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div className="flex flex-col-reverse sm:flex-row justify-between items-start gap-2 mb-2 sm:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500 mb-1">Laporan Menunggu</p>
-              <h3 className="text-3xl font-bold text-red-500">{pendingCount}</h3>
+              <p className="text-xs sm:text-sm font-medium text-slate-500 mb-1">Menunggu</p>
+              <h3 className="text-2xl sm:text-3xl font-bold text-red-500">{pendingCount}</h3>
             </div>
-            <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-5 h-5 text-red-500" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
             </div>
           </div>
         </div>
 
         {/* Dikonfirmasi (CONFIRMED -> YELLOW) */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div className="flex flex-col-reverse sm:flex-row justify-between items-start gap-2 mb-2 sm:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500 mb-1">Dikonfirmasi</p>
-              <h3 className="text-3xl font-bold text-yellow-600">{confirmedCount}</h3>
+              <p className="text-xs sm:text-sm font-medium text-slate-500 mb-1">Dikonfirmasi</p>
+              <h3 className="text-2xl sm:text-3xl font-bold text-yellow-600">{confirmedCount}</h3>
             </div>
-            <div className="w-10 h-10 rounded-full bg-yellow-50 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-5 h-5 text-yellow-600" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-yellow-50 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600" />
             </div>
           </div>
         </div>
 
         {/* Selesai (DONE -> GREEN) */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start mb-4">
+        <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div className="flex flex-col-reverse sm:flex-row justify-between items-start gap-2 mb-2 sm:mb-4">
             <div>
-              <p className="text-sm font-medium text-slate-500 mb-1">Selesai</p>
-              <h3 className="text-3xl font-bold text-green-600">{doneCount}</h3>
+              <p className="text-xs sm:text-sm font-medium text-slate-500 mb-1">Selesai</p>
+              <h3 className="text-2xl sm:text-3xl font-bold text-green-600">{doneCount}</h3>
             </div>
-            <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
-              <CheckCircle className="w-5 h-5 text-green-600" />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-50 flex items-center justify-center shrink-0">
+              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
             </div>
           </div>
         </div>
@@ -129,11 +130,11 @@ export default function AdminDashboard() {
       {/* Pending Reports Section */}
       <div className="pt-4">
           <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-slate-800">Laporan Menunggu Tindakan ({pendingCount})</h2>
+              <h2 className="text-base sm:text-lg font-bold text-slate-800">Laporan Menunggu Tindakan ({pendingCount})</h2>
           </div>
 
           {pendingReports.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {pendingReports.map(report => (
                       <PendingReportCard key={report.id} report={report} />
                   ))}

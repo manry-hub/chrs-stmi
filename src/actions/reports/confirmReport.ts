@@ -34,6 +34,7 @@ export async function confirmReport(input: unknown) {
   // Update report status
   await reportRef.update({
     status: "confirmed",
+    confirmedBy: session.user.id,
     updatedAt: FieldValue.serverTimestamp(),
   });
 

@@ -11,10 +11,12 @@ import { ImagePreview } from "@/components/report/ImagePreview";
 import { Button } from "@/components/ui/Button";
 import type { ReportDocument, ReportLogDocument } from "@/types";
 import toast from "react-hot-toast";
-import { MapPin, Clock, User, MessageSquare, CheckCircle2, ArrowLeft, ExternalLink, Loader2 } from "lucide-react";
+import { MapPin, Clock, User, MessageSquare, CheckCircle2, ArrowLeft, ExternalLink, Loader2, AlertTriangle } from "lucide-react";
 
 interface ReportDetailClientProps {
     report: ReportDocument;
+    currentUserId?: string;
+    currentUserRole?: string;
 }
 
 function formatDate(timestamp: { seconds: number } | null | undefined): string {
@@ -28,11 +30,12 @@ function formatDate(timestamp: { seconds: number } | null | undefined): string {
     });
 }
 
-export function ReportDetailClient({ report }: ReportDetailClientProps) {
+export function ReportDetailClient({ report, currentUserId, currentUserRole }: ReportDetailClientProps) {
     const router = useRouter();
     const [logs, setLogs] = useState<ReportLogDocument[]>([]);
     const [loading, setLoading] = useState(false);
     const [currentStatus, setCurrentStatus] = useState(report.status);
+    const [confirmedBy, setConfirmedBy] = useState(report.confirmedBy);
     const [proofImage, setProofImage] = useState<File | undefined>();
     const [proofImageUrl, setProofImageUrl] = useState<string | undefined>(report.proofImageUrl);
 
@@ -46,6 +49,7 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
         try {
             await confirmReport({ reportId: report.id });
             setCurrentStatus("confirmed");
+            setConfirmedBy(currentUserId);
             toast.success("Laporan berhasil dikonfirmasi");
         } catch (err) {
             const errMessage = err instanceof Error ? err.message : "Gagal mengkonfirmasi laporan";
@@ -99,16 +103,17 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
             </button>
 
             {/* Report Header */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-                <div className="flex items-start justify-between mb-4">
+            <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 mb-4">
                     <div>
-                        <h1 className="text-xl font-bold text-slate-900 mb-1">Detail Laporan</h1>
-                        <p className="text-xs text-slate-400 font-mono">ID: {report.id}</p>
+                        <h1 className="text-lg sm:text-xl font-bold text-slate-900 mb-0.5 sm:mb-1">Detail Laporan</h1>
                     </div>
-                    <ReportStatusBadge status={currentStatus} />
+                    <div className="shrink-0">
+                        <ReportStatusBadge status={currentStatus} />
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     {/* Image */}
                     {report.imageUrl && (
                         <div className="relative aspect-video rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
@@ -168,19 +173,19 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
                 </div>
 
                 {/* Description */}
-                <div className="mt-6 p-4 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-500 font-medium mb-1">Deskripsi</p>
-                    <p className="text-sm text-slate-800 leading-relaxed">{report.description}</p>
+                <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-slate-50 rounded-lg">
+                    <p className="text-[11px] sm:text-xs text-slate-500 font-medium mb-1">Deskripsi</p>
+                    <p className="text-xs sm:text-sm text-slate-800 leading-relaxed">{report.description}</p>
                 </div>
 
                 {/* Additional Message */}
                 {report.additionalMessage && (
-                    <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <div className="mt-3 sm:mt-4 p-3 sm:p-4 bg-amber-50 border border-amber-200 rounded-lg">
                         <div className="flex items-start gap-2">
-                            <MessageSquare className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                            <MessageSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 mt-0.5 flex-shrink-0" />
                             <div>
-                                <p className="text-xs text-amber-700 font-medium mb-1">Detail lokasi atau deskripsi</p>
-                                <p className="text-sm text-amber-800">{report.additionalMessage}</p>
+                                <p className="text-[11px] sm:text-xs text-amber-700 font-medium mb-1">Detail lokasi atau deskripsi</p>
+                                <p className="text-xs sm:text-sm text-amber-800">{report.additionalMessage}</p>
                             </div>
                         </div>
                     </div>
@@ -188,8 +193,8 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
 
                 {/* Proof Image / Upload Section */}
                 {(currentStatus === "confirmed" || (currentStatus === "done" && proofImageUrl)) && (
-                    <div className="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                        <p className="text-sm font-semibold text-slate-800 mb-4">Bukti Penyelesaian</p>
+                    <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <p className="text-xs sm:text-sm font-semibold text-slate-800 mb-3 sm:mb-4">Bukti Penyelesaian</p>
                         
                         {currentStatus === "confirmed" ? (
                             <ImagePreview onImageSelected={(file) => setProofImage(file || undefined)} />
@@ -208,8 +213,8 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
 
                 {/* Confirm Button */}
                 {currentStatus === "pending" && (
-                    <div className="mt-6 pt-4 border-t border-slate-200">
-                        <Button onClick={handleConfirm} disabled={loading} className="bg-yellow-600 hover:bg-yellow-700 text-white gap-2">
+                    <div className="mt-4 sm:mt-6 pt-4 border-t border-slate-200 flex">
+                        <Button onClick={handleConfirm} disabled={loading} className="w-full sm:w-auto bg-yellow-600 hover:bg-yellow-700 text-white gap-2">
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
                             {loading ? "Mengkonfirmasi..." : "Konfirmasi Laporan"}
                         </Button>
@@ -218,11 +223,18 @@ export function ReportDetailClient({ report }: ReportDetailClientProps) {
 
                 {/* Complete Button */}
                 {currentStatus === "confirmed" && (
-                    <div className="mt-6 pt-4 border-t border-slate-200">
-                        <Button onClick={handleDone} disabled={loading} className="bg-green-600 hover:bg-green-700 text-white gap-2">
-                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                            {loading ? "Menyelesaikan..." : "Selesaikan Laporan"}
-                        </Button>
+                    <div className="mt-4 sm:mt-6 pt-4 border-t border-slate-200 flex flex-col gap-3">
+                        {confirmedBy && confirmedBy !== currentUserId && currentUserRole !== "superadmin" ? (
+                            <div className="bg-red-50 text-red-700 text-xs sm:text-sm p-3 sm:p-4 rounded-lg flex items-start gap-2 sm:gap-3 border border-red-100">
+                                <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 shrink-0" />
+                                <p>Laporan ini dikonfirmasi oleh petugas lain. Hanya petugas tersebut atau Superadmin yang memiliki hak akses untuk menyelesaikannya.</p>
+                            </div>
+                        ) : (
+                            <Button onClick={handleDone} disabled={loading} className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white gap-2">
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                                {loading ? "Menyelesaikan..." : "Selesaikan Laporan"}
+                            </Button>
+                        )}
                     </div>
                 )}
             </div>

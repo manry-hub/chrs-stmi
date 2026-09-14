@@ -114,42 +114,42 @@ export function UserManagementTable({ users: initialUsers }: UserManagementTable
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-xs sm:text-sm">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/70">
-                  <th className="text-left py-3.5 px-4 font-semibold text-slate-600">Nama</th>
-                  <th className="text-left py-3.5 px-4 font-semibold text-slate-600">Email</th>
-                  <th className="text-left py-3.5 px-4 font-semibold text-slate-600">Telepon</th>
-                  <th className="text-left py-3.5 px-4 font-semibold text-slate-600">Role</th>
-                  <th className="text-right py-3.5 px-4 font-semibold text-slate-600">Aksi</th>
+                  <th className="text-left py-2.5 sm:py-3.5 px-3 sm:px-4 font-semibold text-slate-600 uppercase tracking-wider text-[10px] sm:text-xs">Nama</th>
+                  <th className="text-left py-2.5 sm:py-3.5 px-3 sm:px-4 font-semibold text-slate-600 uppercase tracking-wider text-[10px] sm:text-xs">Email</th>
+                  <th className="text-left py-2.5 sm:py-3.5 px-3 sm:px-4 font-semibold text-slate-600 uppercase tracking-wider text-[10px] sm:text-xs">Telepon</th>
+                  <th className="text-left py-2.5 sm:py-3.5 px-3 sm:px-4 font-semibold text-slate-600 uppercase tracking-wider text-[10px] sm:text-xs">Role</th>
+                  <th className="text-right py-2.5 sm:py-3.5 px-3 sm:px-4 font-semibold text-slate-600 uppercase tracking-wider text-[10px] sm:text-xs">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-blue-50/30 transition-colors duration-150">
-                    <td className="py-3 px-4 font-medium text-slate-800">{user.name || "-"}</td>
-                    <td className="py-3 px-4 text-slate-600">{user.email || "-"}</td>
-                    <td className="py-3 px-4 text-slate-600">{user.phone || "-"}</td>
-                    <td className="py-3 px-4">
-                      <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-1 rounded-md ${ROLE_COLORS[user.role || "user"] || ROLE_COLORS.user}`}>
+                  <tr key={user.id} className="hover:bg-blue-50/30 transition-colors duration-150 group">
+                    <td className="py-2.5 sm:py-3 px-3 sm:px-4 font-medium text-slate-800">{user.name || "-"}</td>
+                    <td className="py-2.5 sm:py-3 px-3 sm:px-4 text-slate-600">{user.email || "-"}</td>
+                    <td className="py-2.5 sm:py-3 px-3 sm:px-4 text-slate-600">{user.phone || "-"}</td>
+                    <td className="py-2.5 sm:py-3 px-3 sm:px-4">
+                      <span className={`text-[9px] sm:text-[10px] uppercase tracking-wider font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md ${ROLE_COLORS[user.role || "user"] || ROLE_COLORS.user}`}>
                         {ROLE_LABELS[user.role || "user"] || "Civitas Akademika"}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="py-2.5 sm:py-3 px-3 sm:px-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5 sm:gap-2">
                         <button
                           onClick={() => handleEdit(user)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                          className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-[10px] sm:text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <Edit2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                           Edit
                         </button>
                         <button
                           onClick={() => setDeleteTarget(user)}
                           disabled={isPending}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition-all duration-200 disabled:opacity-50 hover:scale-[1.05] active:scale-[0.95]"
+                          className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-[10px] sm:text-xs font-semibold transition-all duration-200 disabled:opacity-50 hover:scale-[1.05] active:scale-[0.95]"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                           Hapus
                         </button>
                       </div>

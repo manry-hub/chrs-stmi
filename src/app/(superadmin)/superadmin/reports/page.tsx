@@ -42,25 +42,28 @@ export default function SuperadminReportsPage() {
     return (
         <div className="space-y-6">
             {/* Page Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-row justify-between items-start gap-4 mb-2 sm:mb-0">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Manajemen Laporan</h1>
-                    <p className="text-sm text-slate-500 mt-1">Pantau seluruh laporan bahaya dari semua pengguna secara real-time.</p>
+                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Manajemen Laporan</h1>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-1">Pantau seluruh laporan bahaya dari semua pengguna secara real-time.</p>
                 </div>
+                <Link href="/dashboard" className="shrink-0 mt-1 sm:mt-0">
+                    <Button size="sm" className="shadow-lg shadow-blue-500/20 text-xs sm:text-sm px-2 sm:px-4 hidden sm:flex">
+                        <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Tambah Laporan</span>
+                        <span className="sm:hidden">Tambah</span>
+                    </Button>
+                    <Button size="sm" className="shadow-lg shadow-blue-500/20 text-[10px] px-2 h-8 flex sm:hidden">
+                        <Plus className="w-3 h-3 mr-1" />
+                        Tambah
+                    </Button>
+                </Link>
             </div>
 
             {/* Filter */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <Link href="/dashboard">
-                    <Button className="shadow-lg shadow-blue-500/20 w-full sm:w-auto">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Tambah Laporan
-                    </Button>
-                </Link>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <ReportFilterBar value={statusFilter} onChange={setStatusFilter} />
-                    <DateFilterBar value={dateFilter} onChange={setDateFilter} />
-                </div>
+            <div className="flex flex-row justify-end items-center gap-2 sm:gap-4 mb-6 mt-4 sm:mt-0">
+                <ReportFilterBar value={statusFilter} onChange={setStatusFilter} />
+                <DateFilterBar value={dateFilter} onChange={setDateFilter} />
             </div>
 
             {/* Report Table or Loading */}

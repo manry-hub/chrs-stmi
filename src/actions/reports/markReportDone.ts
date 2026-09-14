@@ -32,6 +32,15 @@ export async function markReportDone(input: unknown) {
     throw new Error("Laporan belum dikonfirmasi atau sudah selesai");
   }
 
+  // Ensure only the CS who confirmed the report can mark it as done
+  if (
+    reportData?.confirmedBy &&
+    reportData.confirmedBy !== session.user.id &&
+    session.user.role !== "superadmin"
+  ) {
+    throw new Error("Hanya petugas yang mengkonfirmasi yang dapat menyelesaikan laporan ini.");
+  }
+
   // Update report status
   await reportRef.update({
     status: "done",

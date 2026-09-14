@@ -60,6 +60,22 @@ export function LocationPicker({ onLocationChange, error, nameError, locations, 
                 {nameError && <p className="text-red-500 text-xs mt-1">{nameError}</p>}
                 {error && !nameError && <p className="text-red-500 text-xs mt-1">{error}</p>}
             </div>
+
+            {selectedId && !nameError && !error && (
+                <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-slate-400"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>
+                        Penanggung Jawab:{" "}
+                        <span className="font-medium text-slate-700">
+                            {(() => {
+                                const loc = locations.find((l) => l.id === selectedId);
+                                if (!loc || !loc.adminNames || loc.adminNames.length === 0) return "Belum ditentukan";
+                                return loc.adminNames.join(", ");
+                            })()}
+                        </span>
+                    </span>
+                </div>
+            )}
         </div>
     );
 }

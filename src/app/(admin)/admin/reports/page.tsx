@@ -46,41 +46,48 @@ export default function AdminReportsPage() {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Manajemen Laporan</h1>
-          <p className="text-sm text-slate-500 mt-1">
+      <div className="mb-4 sm:mb-6 flex flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
+        <div className="flex-1">
+          <h1 className="text-lg sm:text-2xl font-bold text-slate-900 leading-tight">Manajemen Laporan</h1>
+          <p className="text-[10px] sm:text-sm text-slate-500 mt-0.5 sm:mt-1 leading-snug">
             Daftar seluruh laporan bahaya yang masuk secara real-time.
           </p>
         </div>
-        
-        <div className="flex bg-slate-100 p-1 rounded-lg shrink-0">
-            <button
-                onClick={() => setViewMode("my-locations")}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewMode === "my-locations" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
-            >
-                Lokasi Saya
-            </button>
-            <button
-                onClick={() => setViewMode("all")}
-                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${viewMode === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
-            >
-                Semua Lokasi
-            </button>
-        </div>
-      </div>
-
-      {/* Filter & Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <Link href="/dashboard">
-          <Button className="shadow-lg shadow-blue-500/20 w-full sm:w-auto">
-            <Plus className="w-4 h-4 mr-2" />
+        <Link href="/dashboard" className="shrink-0 mt-0.5 sm:mt-0">
+          <Button className="shadow-md sm:shadow-lg shadow-blue-500/20 text-[10px] sm:text-sm h-7 sm:h-10 px-2 sm:px-4 py-0 sm:py-2">
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             Tambah Laporan
           </Button>
         </Link>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col gap-3 mb-6">
+        <div className="flex flex-row items-center justify-between gap-2 sm:gap-4 overflow-x-auto pb-1 sm:pb-0">
+          <div className="shrink-0">
+            <div className="flex bg-slate-100 p-1 rounded-lg">
+                <button
+                    onClick={() => setViewMode("my-locations")}
+                    className={`px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-sm font-medium rounded-md transition-colors ${viewMode === "my-locations" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                >
+                    Lokasi Saya
+                </button>
+                <button
+                    onClick={() => setViewMode("all")}
+                    className={`px-3 py-1.5 sm:px-4 sm:py-2 text-[11px] sm:text-sm font-medium rounded-md transition-colors ${viewMode === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                >
+                    Semua Lokasi
+                </button>
+            </div>
+          </div>
+          
+          <div className="flex justify-end shrink-0">
+            <DateFilterBar value={dateFilter} onChange={setDateFilter} />
+          </div>
+        </div>
+
+        <div className="flex overflow-x-auto pb-1 sm:pb-0 w-full">
           <ReportFilterBar value={statusFilter} onChange={setStatusFilter} />
-          <DateFilterBar value={dateFilter} onChange={setDateFilter} />
         </div>
       </div>
 

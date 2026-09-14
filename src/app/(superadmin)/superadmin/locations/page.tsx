@@ -33,8 +33,8 @@ export default async function LocationsPage() {
             <div className="flex items-center gap-4">
               
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Manajemen Lokasi & Admin</h1>
-                    <p className="text-sm text-slate-500 mt-1">Kelola daftar lokasi, tugaskan admin penanggung jawab, dan buat QR Code.</p>
+                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Manajemen Lokasi & Admin</h1>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-1">Kelola daftar lokasi, tugaskan admin penanggung jawab, dan buat QR Code.</p>
                 </div>
             </div>
 

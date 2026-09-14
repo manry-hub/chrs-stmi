@@ -64,7 +64,7 @@ export function ReportTable({ reports, baseUrl = "/admin/reports", allowDelete =
         <>
             <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-xs sm:text-sm">
                         <thead>
                             <tr className="border-b border-slate-100 bg-slate-50/70">
                                 <th className="text-left py-3.5 px-4 font-semibold text-slate-600">Pelapor</th>

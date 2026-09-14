@@ -93,32 +93,32 @@ export function HazardTypeClient({ initialData }: HazardTypeClientProps) {
             ) : (
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-slate-600">
+                        <table className="w-full text-left text-xs sm:text-sm text-slate-600">
                             <thead className="bg-slate-50/70 border-b border-slate-100 text-slate-800">
                                 <tr>
-                                    <th className="px-6 py-4 font-semibold text-slate-600">Nama Kategori</th>
-                                    <th className="px-6 py-4 font-semibold text-right text-slate-600">Aksi</th>
+                                    <th className="px-3 sm:px-6 py-2.5 sm:py-4 font-semibold text-slate-600 uppercase tracking-wider text-[10px] sm:text-xs">Nama Kategori</th>
+                                    <th className="px-3 sm:px-6 py-2.5 sm:py-4 font-semibold text-right text-slate-600 uppercase tracking-wider text-[10px] sm:text-xs">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {hazardTypes.map((hazard) => (
                                     <tr key={hazard.id} className="hover:bg-blue-50/30 transition-colors duration-150">
-                                        <td className="px-6 py-4 font-medium text-slate-900">{hazard.name}</td>
-                                        <td className="px-6 py-4 text-right space-x-2">
+                                        <td className="px-3 sm:px-6 py-3 sm:py-4 font-medium text-slate-900">{hazard.name}</td>
+                                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-right space-x-1 sm:space-x-2 whitespace-nowrap">
                                             <button
                                                 onClick={() => handleEditClick(hazard)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                                                className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-[10px] sm:text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                                                 title="Edit"
                                             >
-                                                <Edit2 className="w-3.5 h-3.5" />
+                                                <Edit2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                                 Edit
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(hazard.id)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                                                className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-[10px] sm:text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                                                 title="Hapus"
                                             >
-                                                <Trash2 className="w-3.5 h-3.5" />
+                                                <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                                 Hapus
                                             </button>
                                         </td>

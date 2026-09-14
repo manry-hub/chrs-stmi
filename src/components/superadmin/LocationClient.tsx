@@ -131,56 +131,56 @@ export function LocationClient({ initialData, admins }: LocationClientProps) {
             ) : (
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm text-slate-600">
+                        <table className="w-full text-left text-xs sm:text-sm text-slate-600">
                             <thead className="bg-slate-50/70 border-b border-slate-100 text-slate-800">
                                 <tr>
-                                    <th className="px-6 py-4 font-semibold text-slate-600">Nama Lokasi</th>
-                                    <th className="px-6 py-4 font-semibold text-slate-600">Penanggung Jawab</th>
-                                    <th className="px-6 py-4 font-semibold text-right text-slate-600">Aksi</th>
+                                    <th className="px-3 sm:px-6 py-2.5 sm:py-4 font-semibold text-slate-600 uppercase tracking-wider text-[10px] sm:text-xs">Nama Lokasi</th>
+                                    <th className="px-3 sm:px-6 py-2.5 sm:py-4 font-semibold text-slate-600 uppercase tracking-wider text-[10px] sm:text-xs">Penanggung Jawab</th>
+                                    <th className="px-3 sm:px-6 py-2.5 sm:py-4 font-semibold text-right text-slate-600 uppercase tracking-wider text-[10px] sm:text-xs">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
                                 {locations.map((loc) => (
                                     <tr key={loc.id} className="hover:bg-blue-50/30 transition-colors duration-150">
-                                        <td className="px-6 py-4">
+                                        <td className="px-3 sm:px-6 py-3 sm:py-4">
                                             <p className="font-medium text-slate-900">{loc.name}</p>
                                         </td>
-                                        <td className="px-6 py-4">
+                                        <td className="px-3 sm:px-6 py-3 sm:py-4">
                                             {loc.adminIds && loc.adminIds.length > 0 ? (
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {loc.adminNames.map((name, idx) => (
-                                                        <span key={loc.adminIds[idx]} className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-100 text-blue-800 tracking-wide uppercase">
+                                                        <span key={loc.adminIds[idx]} className="inline-flex items-center px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-semibold bg-blue-100 text-blue-800 tracking-wide uppercase">
                                                             {name}
                                                         </span>
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <span className="text-slate-400 text-xs italic bg-slate-100 px-2 py-1 rounded-md">Belum di-assign</span>
+                                                <span className="text-slate-400 text-[10px] sm:text-xs italic bg-slate-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">Belum di-assign</span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 text-right space-x-2">
+                                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-right space-x-1 sm:space-x-2 whitespace-nowrap">
                                             <button
                                                 onClick={() => setShowQR(loc.id)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 hover:bg-slate-200 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                                                className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-slate-50 text-slate-600 hover:bg-slate-200 rounded-lg text-[10px] sm:text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                                                 title="Lihat QR Code"
                                             >
-                                                <QrCode className="w-3.5 h-3.5" />
+                                                <QrCode className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                                 QR Code
                                             </button>
                                             <button
                                                 onClick={() => handleEditClick(loc)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                                                className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-[10px] sm:text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                                                 title="Edit"
                                             >
-                                                <Edit2 className="w-3.5 h-3.5" />
+                                                <Edit2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                                 Edit
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(loc.id)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
+                                                className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-[10px] sm:text-xs font-semibold transition-all duration-200 hover:scale-[1.05] active:scale-[0.95]"
                                                 title="Hapus"
                                             >
-                                                <Trash2 className="w-3.5 h-3.5" />
+                                                <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                                 Hapus
                                             </button>
                                         </td>

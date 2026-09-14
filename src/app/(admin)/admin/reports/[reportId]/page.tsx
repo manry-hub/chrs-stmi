@@ -1,5 +1,6 @@
 import { adminDb } from "@/lib/firebase/admin";
 import { notFound } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { ReportDetailClient } from "@/components/admin/ReportDetailClient";
 import type { ReportDocument } from "@/types";
 
@@ -9,6 +10,7 @@ interface ReportDetailPageProps {
 
 export default async function ReportDetailPage({ params }: ReportDetailPageProps) {
   const { reportId } = await params;
+  const session = await auth();
 
   const snap = await adminDb.collection("reports").doc(reportId).get();
   if (!snap.exists) notFound();
@@ -26,9 +28,10 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
     additionalMessage: data?.additionalMessage,
     status: data?.status ?? "pending",
     proofImageUrl: data?.proofImageUrl,
+    confirmedBy: data?.confirmedBy,
     createdAt: data?.createdAt ? { seconds: data.createdAt.seconds, nanoseconds: data.createdAt.nanoseconds } : { seconds: 0, nanoseconds: 0 },
     updatedAt: data?.updatedAt ? { seconds: data.updatedAt.seconds, nanoseconds: data.updatedAt.nanoseconds } : { seconds: 0, nanoseconds: 0 },
   } as ReportDocument;
 
-  return <ReportDetailClient report={report} />;
+  return <ReportDetailClient report={report} currentUserId={session?.user?.id} currentUserRole={session?.user?.role} />;
 }

@@ -6,6 +6,9 @@ import { MapPin, User, Calendar, MessageSquare, ArrowLeft, Home } from "lucide-r
 import Link from "next/link";
 import { ROUTES } from "@/constants";
 
+import { auth } from "@/lib/auth";
+import { AppShell } from "@/components/layout/AppShell";
+
 export const revalidate = 0;
 
 async function getReportDetails(id: string) {
@@ -40,17 +43,18 @@ function formatDate(timestamp: any) {
 export default async function ReportDetailPage({ params }: { params: Promise<{ reportId: string }> }) {
     const { reportId } = await params;
     const data = await getReportDetails(reportId);
-
+    
     if (!data) return notFound();
 
     const { report, logs } = data;
+    const session = await auth();
 
-    return (
-        <div className="min-h-screen bg-slate-50 py-10">
+    const content = (
+        <div className="min-h-screen bg-slate-50 py-6 sm:py-10">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-wrap items-center gap-4 mb-6">
                     <Link
-                        href={ROUTES.REPORTS}
+                        href={session?.user ? (session.user.role === "admin" ? "/admin/reports" : session.user.role === "superadmin" ? "/superadmin/reports" : ROUTES.DASHBOARD_REPORTS) : ROUTES.REPORTS}
                         className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />
@@ -67,24 +71,24 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
                         />
                     </div>
 
-                    <div className="p-6 sm:p-8">
-                        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-6 mb-6">
+                    <div className="p-4 sm:p-8">
+                        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4 sm:pb-6 mb-4 sm:mb-6">
                             <ReportStatusBadge status={report.status} />
-                            <div className="text-sm text-slate-500 flex items-center gap-2">
+                            <div className="text-xs sm:text-sm text-slate-500 flex items-center gap-2">
                                 <Calendar className="w-4 h-4" />
                                 {formatDate(report.createdAt)}
                             </div>
                         </div>
 
-                        <div className="prose max-w-none mb-8 text-slate-900">
-                            <h2 className="text-xl font-semibold mb-4 leading-relaxed">{report.description}</h2>
+                        <div className="prose max-w-none mb-6 sm:mb-8 text-slate-900">
+                            <h2 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-4 leading-relaxed">{report.description}</h2>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-50 rounded-lg p-5 border border-slate-100 mb-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 bg-slate-50 rounded-lg p-4 sm:p-5 border border-slate-100 mb-6 sm:mb-8">
                             <div className="flex gap-3 text-slate-700">
                                 <MapPin className="w-5 h-5 text-slate-400 shrink-0" />
                                 <div>
-                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Lokasi</p>
+                                    <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Lokasi</p>
                                     <p className="text-sm font-medium">{report.location.name}</p>
                                 </div>
                             </div>
@@ -92,7 +96,7 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
                             <div className="flex gap-3 text-slate-700">
                                 <User className="w-5 h-5 text-slate-400 shrink-0" />
                                 <div>
-                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Pelapor</p>
+                                    <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Pelapor</p>
                                     <p className="text-sm font-medium">{report.userName}</p>
                                 </div>
                             </div>
@@ -101,7 +105,7 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
                                 <div className="flex gap-3 text-slate-700 sm:col-span-2">
                                     <MessageSquare className="w-5 h-5 text-slate-400 shrink-0" />
                                     <div>
-                                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Detail lokasi atau deskripsi</p>
+                                        <p className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Detail lokasi atau deskripsi</p>
                                         <p className="text-sm">{report.additionalMessage}</p>
                                     </div>
                                 </div>
@@ -109,8 +113,8 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
                         </div>
 
                         {report.status === "done" && report.proofImageUrl && (
-                            <div className="mb-8">
-                                <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Bukti Penyelesaian</h3>
+                            <div className="mb-6 sm:mb-8">
+                                <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4 border-b border-slate-100 pb-2">Bukti Penyelesaian</h3>
                                 <div className="aspect-video w-full max-w-2xl bg-slate-100 rounded-lg overflow-hidden border border-slate-200">
                                     <img
                                         src={report.proofImageUrl}
@@ -123,15 +127,15 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
 
                         {logs.length > 0 && (
                             <div>
-                                <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">Log Riwayat Status</h3>
-                                <div className="space-y-4">
+                                <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-3 sm:mb-4 border-b border-slate-100 pb-2">Log Riwayat Status</h3>
+                                <div className="space-y-3 sm:space-y-4">
                                     {logs.map((log: ReportLogDocument) => (
-                                        <div key={log.id} className="bg-white border text-sm rounded-md p-4">
-                                            <div className="flex justify-between items-start">
+                                        <div key={log.id} className="bg-white border text-xs sm:text-sm rounded-md p-3 sm:p-4">
+                                            <div className="flex flex-wrap justify-between items-start gap-2">
                                                 <div className="font-semibold text-slate-800 capitalize">{log.action.replace("-", " ")}</div>
-                                                <div className="text-xs text-slate-500">{formatDate(log.createdAt)}</div>
+                                                <div className="text-[10px] sm:text-xs text-slate-500">{formatDate(log.createdAt)}</div>
                                             </div>
-                                            {log.note && <p className="text-slate-600 mt-2">{log.note}</p>}
+                                            {log.note && <p className="text-slate-600 mt-1.5 sm:mt-2">{log.note}</p>}
                                         </div>
                                     ))}
                                 </div>
@@ -142,4 +146,14 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
             </div>
         </div>
     );
+
+    if (session?.user?.role) {
+        return (
+            <AppShell role={session.user.role} userName={session.user.name || "User"}>
+                {content}
+            </AppShell>
+        );
+    }
+
+    return content;
 }

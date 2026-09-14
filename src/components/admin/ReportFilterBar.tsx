@@ -23,7 +23,7 @@ export function ReportFilterBar({ value, onChange }: ReportFilterBarProps) {
           key={f.value}
           onClick={() => onChange(f.value)}
           className={cn(
-            "px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap",
+            "px-3 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap",
             value === f.value
               ? "bg-white text-slate-900 shadow-sm"
               : "text-slate-500 hover:text-slate-700"

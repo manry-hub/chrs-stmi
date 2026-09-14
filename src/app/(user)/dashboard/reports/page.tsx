@@ -10,14 +10,14 @@ export default async function DashboardReportsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+        <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
           Riwayat Laporan Saya
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Pantau status laporan sumber potensi bahaya yang pernah Anda ajukan secara real-time.
+        <p className="text-xs sm:text-sm text-slate-500 mt-1 sm:mt-2">
+          Pantau status laporan sumber potensi bahaya yang pernah Anda ajukan.
         </p>
       </div>
 

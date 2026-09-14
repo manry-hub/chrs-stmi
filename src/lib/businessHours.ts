@@ -26,13 +26,14 @@ export function calculateEffectiveMinutes(startTimeInput: any, endTimeInput: any
 
   while (current < end && iterations < maxIterations) {
     const hour = current.getHours();
+    const minute = current.getMinutes();
     
     // Aturan Jam Kerja Efektif:
-    // 1. Istirahat jam 12:00 - 12:59
-    // 2. Di luar jam kerja (sebelum 07:00 pagi dan setelah 16:00 sore) tidak dihitung argo
+    // 1. Istirahat jam 12:00 - 12:59 (jam 12 sampai jam 1)
+    // 2. Di luar jam kerja (sebelum 06:00 pagi dan setelah 16:30 sore) tidak dihitung argo
     
     const isBreakTime = hour === 12;
-    const isOffHours = hour < 7 || hour >= 16;
+    const isOffHours = hour < 6 || hour > 16 || (hour === 16 && minute >= 30);
     
     if (!isBreakTime && !isOffHours) {
       effectiveMinutes++;

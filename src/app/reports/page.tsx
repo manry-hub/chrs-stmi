@@ -29,28 +29,28 @@ export default async function PublicReportsPage() {
     const reports = await getPublicReports();
 
     return (
-        <div className="min-h-screen bg-slate-50 py-10">
+        <div className="min-h-screen bg-slate-50 py-6 sm:py-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <Link
                     href={ROUTES.HOME}
-                    className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 mb-6 transition-colors"
+                    className="inline-flex items-center gap-2 text-xs sm:text-sm text-slate-500 hover:text-blue-600 mb-6 transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     Kembali ke Home
                 </Link>
-                <div className="text-center max-w-5xl mx-auto mb-12">
-                    <h1 className="text-3xl font-bold text-slate-900 flex items-center justify-center gap-3">Daftar Sumber Potensi Bahaya di Politeknik STMI Jakarta</h1>
-                    <p className="mt-4 text-slate-500">Semua laporan bersifat
+                <div className="text-center max-w-5xl mx-auto mb-8 sm:mb-12">
+                    <h1 className="text-xl sm:text-3xl font-bold text-slate-900 flex items-center justify-center gap-2 sm:gap-3">Daftar Sumber Potensi Bahaya di Politeknik STMI Jakarta</h1>
+                    <p className="mt-2 sm:mt-4 text-xs sm:text-sm text-slate-500">Semua laporan bersifat
                         transparan untuk meningkatkan kesadaran bersama.
                     </p>
                 </div>
 
                 {reports.length === 0 ? (
                     <div className="text-center py-12 bg-white rounded-lg border border-slate-100 shadow-sm">
-                        <p className="text-slate-500">Belum ada laporan sumber potensi bahaya yang masuk.</p>
+                        <p className="text-slate-500 text-sm">Belum ada laporan sumber potensi bahaya yang masuk.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                         {reports.map((report: ReportDocument) => (
                             <ReportCard key={report.id} report={report} />
                         ))}
