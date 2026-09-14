@@ -100,17 +100,17 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
             }
 
             const locationData = data.location as any;
-            const draftPayload = {
+                const draftPayload = {
                 id: draftId,
                 formData: {
                     description: data.description,
                     additionalMessage: data.additionalMessage,
+                    locationId: locationData.locationId,
+                    assignedAdminId: locationData.assignedAdminId,
                     location: {
                         name: locationData.name,
                         lat,
                         lng,
-                        locationId: locationData.locationId,
-                        assignedAdminId: locationData.assignedAdminId,
                     }
                 },
                 imageFile: data.image as File
@@ -179,10 +179,10 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
                     formData: {
                         description: data.description,
                         additionalMessage: data.additionalMessage,
+                        locationId: locationData.locationId,
+                        assignedAdminId: locationData.assignedAdminId,
                         location: {
                             name: locationData.name,
-                            locationId: locationData.locationId,
-                            assignedAdminId: locationData.assignedAdminId,
                         }
                     },
                     imageFile: data.image as File

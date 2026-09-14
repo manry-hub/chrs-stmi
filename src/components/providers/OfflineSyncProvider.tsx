@@ -7,6 +7,8 @@ import toast from "react-hot-toast";
 
 export function OfflineSyncProvider({ children }: { children: React.ReactNode }) {
     const [isOnline, setIsOnline] = useState(true);
+    // Track drafts currently being synced in this session to avoid concurrent syncs of the same draft
+    const [syncingIds] = useState(() => new Set<string>());
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -46,12 +48,18 @@ export function OfflineSyncProvider({ children }: { children: React.ReactNode })
         const drafts = await getDrafts();
         if (drafts.length === 0) return;
 
-        // Find drafts that are PENDING or FAILED to retry
-        const draftsToSync = drafts.filter(d => d.status === "PENDING" || d.status === "FAILED");
+        // Find drafts to retry. We include SYNCING here because if they are not in our in-memory syncingIds,
+        // it means they were left over from a previous interrupted session (e.g. app closed).
+        const draftsToSync = drafts.filter(
+            d => (d.status === "PENDING" || d.status === "FAILED" || d.status === "SYNCING") && !syncingIds.has(d.id)
+        );
         
         for (const draft of draftsToSync) {
+            syncingIds.add(draft.id);
             try {
-                await updateDraftStatus(draft.id, "SYNCING");
+                if (draft.status !== "SYNCING") {
+                    await updateDraftStatus(draft.id, "SYNCING");
+                }
                 
                 // 1. Upload Image
                 const formData = new FormData();
@@ -76,6 +84,9 @@ export function OfflineSyncProvider({ children }: { children: React.ReactNode })
                 const payload = {
                     ...draft.formData,
                     draftId: draft.id,
+                    // Fallback to location object for backward compatibility with old drafts
+                    locationId: draft.formData.locationId || (draft.formData.location as any).locationId,
+                    assignedAdminId: draft.formData.assignedAdminId || (draft.formData.location as any).assignedAdminId,
                     imageUrl,
                     image: undefined, // remove file
                 };
@@ -99,6 +110,8 @@ export function OfflineSyncProvider({ children }: { children: React.ReactNode })
                 await updateDraftStatus(draft.id, "FAILED", errorMessage);
                 // Optionally show a toast for failure, but it might be annoying if it fails repeatedly in background
                 // toast.error(`Gagal sinkronisasi laporan: ${errorMessage}`);
+            } finally {
+                syncingIds.delete(draft.id);
             }
         }
     };

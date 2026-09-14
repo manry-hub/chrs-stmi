@@ -9,12 +9,12 @@ export interface OfflineDraft {
   formData: {
     description: string;
     additionalMessage?: string;
+    locationId?: string;
+    assignedAdminId?: string;
     location: {
-      locationId?: string;
       name: string;
       lat?: number;
       lng?: number;
-      assignedAdminId?: string;
     };
   };
   imageFile: File; // File object stored as Blob/File in IDB
