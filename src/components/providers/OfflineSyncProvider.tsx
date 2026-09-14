@@ -108,8 +108,6 @@ export function OfflineSyncProvider({ children }: { children: React.ReactNode })
                 const errorMessage = isNetworkError ? "Koneksi terputus saat sinkronisasi" : (error.message || "Gagal sinkronisasi");
                 
                 await updateDraftStatus(draft.id, "FAILED", errorMessage);
-                // Optionally show a toast for failure, but it might be annoying if it fails repeatedly in background
-                // toast.error(`Gagal sinkronisasi laporan: ${errorMessage}`);
             } finally {
                 syncingIds.delete(draft.id);
             }

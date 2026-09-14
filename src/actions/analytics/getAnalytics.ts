@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { adminDb } from "@/lib/firebase/admin";
 import { HAZARD_TYPES } from "@/constants";
 import { DateFilterRange, isWithinDateRange } from "@/lib/utils";
-import { calculateEffectiveMinutes } from "@/lib/businessHours";
+import { fetchReportResponseTime } from "@/lib/reportsHelper";
 
 export async function getAnalytics(dateFilter: DateFilterRange = "hari") {
   const session = await auth();
@@ -57,34 +57,19 @@ export async function getAnalytics(dateFilter: DateFilterRange = "hari") {
   // Average response time: createdAt → first "confirmed" log
   // Average response time logic relies on 'confirmed' or 'done' since 'done' implies it was confirmed previously
   // Wait, the rule is to fetch logs where action == "confirmed". That's fine.
-  const responseTimes: number[] = [];
-
-  for (const doc of reportsSnap.docs) {
+  const responsePromises = reportsSnap.docs.map(async (doc) => {
     const data = doc.data();
-    if (data.status !== "confirmed" && data.status !== "done") continue;
+    if (data.status !== "confirmed" && data.status !== "done") return null;
     
     // Check if this document falls into our date range
     const docDate = data.createdAt?.seconds ? new Date(data.createdAt.seconds * 1000) : null;
-    if (!isWithinDateRange(docDate, dateFilter)) continue;
+    if (!isWithinDateRange(docDate, dateFilter)) return null;
 
-    const logsSnap = await adminDb
-      .collection("reports")
-      .doc(doc.id)
-      .collection("logs")
-      .where("action", "==", "confirmed")
-      .orderBy("createdAt", "asc")
-      .limit(1)
-      .get();
+    return fetchReportResponseTime(doc.id, data.createdAt?.seconds);
+  });
 
-    if (!logsSnap.empty) {
-      const created = doc.data().createdAt?.seconds ?? 0;
-      const confirmedTime = logsSnap.docs[0].data().createdAt?.seconds ?? 0;
-      if (created && confirmedTime) {
-        const effectiveMins = calculateEffectiveMinutes(created, confirmedTime);
-        responseTimes.push(effectiveMins);
-      }
-    }
-  }
+  const responseResults = await Promise.all(responsePromises);
+  const responseTimes = responseResults.filter((time): time is number => time !== null);
 
   const avgResponseMinutes =
     responseTimes.length > 0

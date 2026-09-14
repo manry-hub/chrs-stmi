@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase/admin";
-import { sendPushToSuperadmins } from "@/lib/notifications/sendPushToSuperadmins";
+import { sendPushToSuperadmins } from "@/lib/notifications/sendPush";
 import { getNotificationSettings } from "@/actions/notifications/notificationSettings";
 import { FieldValue } from "firebase-admin/firestore";
 

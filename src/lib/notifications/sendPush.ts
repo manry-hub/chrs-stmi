@@ -13,12 +13,13 @@ if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 }
 
 /**
- * Send push notification to ALL subscribed users (civitas, admin, superadmin).
- * Optionally exclude a specific user (e.g. the reporter themselves).
+ * Shared helper to send push notifications.
+ * Handles the actual pushing and expired subscription cleanup.
  */
-export async function sendPushToAll(
+async function sendToQuery(
+  query: FirebaseFirestore.Query,
   payload: { title: string; body: string; url?: string },
-  excludeUserId?: string
+  filterFn?: (data: FirebaseFirestore.DocumentData) => boolean
 ) {
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
     console.error('❌ VAPID Keys belum diset! Notifikasi tidak dikirim.');
@@ -26,18 +27,18 @@ export async function sendPushToAll(
   }
 
   try {
-    const snapshot = await adminDb.collection('pushSubscriptions').get();
+    const snapshot = await query.get();
 
     if (snapshot.empty) {
-      console.log('No push subscriptions found.');
+      console.log('No push subscriptions found for this query.');
       return;
     }
 
     const notifications = snapshot.docs.map(async (doc) => {
       const data = doc.data();
 
-      // Skip the excluded user (e.g. the reporter)
-      if (excludeUserId && data.userId === excludeUserId) {
+      // Apply custom filter if provided
+      if (filterFn && !filterFn(data)) {
         return;
       }
 
@@ -64,6 +65,34 @@ export async function sendPushToAll(
 
     await Promise.allSettled(notifications);
   } catch (error) {
-    console.error('Error in sendPushToAll:', error);
+    console.error('Error in sendToQuery:', error);
   }
+}
+
+export async function sendPushToAdmins(payload: { title: string; body: string; url?: string }, targetAdminId?: string) {
+  const query = adminDb.collection('pushSubscriptions').where('role', 'in', ['admin', 'superadmin']);
+  
+  await sendToQuery(query, payload, (data) => {
+    // If there's a target admin, only send to that admin AND superadmins
+    if (targetAdminId && data.role === 'admin' && data.userId !== targetAdminId) {
+      return false;
+    }
+    return true;
+  });
+}
+
+export async function sendPushToSuperadmins(payload: { title: string; body: string; url?: string }) {
+  const query = adminDb.collection('pushSubscriptions').where('role', '==', 'superadmin');
+  await sendToQuery(query, payload);
+}
+
+export async function sendPushToAll(payload: { title: string; body: string; url?: string }, excludeUserId?: string) {
+  const query = adminDb.collection('pushSubscriptions');
+  await sendToQuery(query, payload, (data) => {
+    // Skip the excluded user (e.g. the reporter)
+    if (excludeUserId && data.userId === excludeUserId) {
+      return false;
+    }
+    return true;
+  });
 }

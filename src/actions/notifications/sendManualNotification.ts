@@ -2,7 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { adminDb } from "@/lib/firebase/admin";
-import { sendPushToAdmins } from "@/lib/notifications/sendPushToAdmins";
+import { sendPushToAdmins } from "@/lib/notifications/sendPush";
 
 /**
  * Send a manual push notification reminder from superadmin to the assigned admin

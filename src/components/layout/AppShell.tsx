@@ -18,7 +18,6 @@ import {
     PanelLeftClose,
     ClipboardList,
     PlusCircle,
-    TrendingUp,
     MapPin,
     ShieldAlert,
     User,

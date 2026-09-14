@@ -5,8 +5,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import { submitReportSchema } from "@/lib/validations/report";
 import { FieldValue } from "firebase-admin/firestore";
 
-import { sendPushToAdmins } from "@/lib/notifications/sendPushToAdmins";
-import { sendPushToAll } from "@/lib/notifications/sendPushToAll";
+import { sendPushToAdmins, sendPushToAll } from "@/lib/notifications/sendPush";
 
 export async function submitReport(formData: unknown) {
   const session = await auth();

@@ -23,6 +23,4 @@ export const updateProfileSchema = z.object({
 });
 
 export type UserFormInput = z.infer<typeof userFormSchema>;
-export type CreateUserInput = z.infer<typeof createUserSchema>;
-export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

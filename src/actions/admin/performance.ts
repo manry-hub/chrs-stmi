@@ -3,7 +3,7 @@
 import { adminDb } from "@/lib/firebase/admin";
 import { auth } from "@/lib/auth";
 import { DateFilterRange, isWithinDateRange } from "@/lib/utils";
-import { calculateEffectiveMinutes } from "@/lib/businessHours";
+import { fetchReportResponseTime } from "@/lib/reportsHelper";
 
 export interface AdminPerformance {
     adminId: string;
@@ -82,24 +82,10 @@ export async function getAdminPerformance(dateFilter: DateFilterRange = "hari"):
 
                 // If confirmed or done, calculate response time
                 if (data.status === "confirmed" || data.status === "done") {
-                    const promise = adminDb
-                        .collection("reports")
-                        .doc(doc.id)
-                        .collection("logs")
-                        .where("action", "==", "confirmed")
-                        .orderBy("createdAt", "asc")
-                        .limit(1)
-                        .get()
-                        .then(logsSnap => {
-                            if (!logsSnap.empty) {
-                                const created = data.createdAt?.seconds ?? 0;
-                                const confirmedTime = logsSnap.docs[0].data().createdAt?.seconds ?? 0;
-                                if (created && confirmedTime) {
-                                    return { adminId: data.assignedAdminId, responseTime: calculateEffectiveMinutes(created, confirmedTime) };
-                                }
-                            }
-                            return { adminId: data.assignedAdminId, responseTime: null };
-                        });
+                    const promise = fetchReportResponseTime(doc.id, data.createdAt?.seconds).then(responseTime => ({
+                        adminId: data.assignedAdminId,
+                        responseTime
+                    }));
                     responsePromises.push(promise);
                 }
             }
@@ -186,24 +172,10 @@ export async function getLocationPerformance(dateFilter: DateFilterRange = "hari
 
                 // If confirmed or done, calculate response time
                 if (data.status === "confirmed" || data.status === "done") {
-                    const promise = adminDb
-                        .collection("reports")
-                        .doc(doc.id)
-                        .collection("logs")
-                        .where("action", "==", "confirmed")
-                        .orderBy("createdAt", "asc")
-                        .limit(1)
-                        .get()
-                        .then(logsSnap => {
-                            if (!logsSnap.empty) {
-                                const created = data.createdAt?.seconds ?? 0;
-                                const confirmedTime = logsSnap.docs[0].data().createdAt?.seconds ?? 0;
-                                if (created && confirmedTime) {
-                                    return { locationName: locName, responseTime: calculateEffectiveMinutes(created, confirmedTime) };
-                                }
-                            }
-                            return { locationName: locName, responseTime: null };
-                        });
+                    const promise = fetchReportResponseTime(doc.id, data.createdAt?.seconds).then(responseTime => ({
+                        locationName: locName,
+                        responseTime
+                    }));
                     responsePromises.push(promise);
                 }
             }

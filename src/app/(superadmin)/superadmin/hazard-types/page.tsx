@@ -1,8 +1,6 @@
 import { getHazardTypes } from "@/actions/masterData/hazardTypes";
 import { HazardTypeClient } from "@/components/superadmin/HazardTypeClient";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { ROUTES } from "@/constants";
 
 export const revalidate = 0;
 
