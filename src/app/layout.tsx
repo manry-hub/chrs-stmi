@@ -35,6 +35,7 @@ export const viewport = {
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import SessionProvider from "@/components/providers/SessionProvider";
 import { OfflineSyncProvider } from "@/components/providers/OfflineSyncProvider";
+import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
 
 export default function RootLayout({
   children,
@@ -51,6 +52,7 @@ export default function RootLayout({
           <OfflineSyncProvider>
             <ServiceWorkerRegister />
             {children}
+            <PWAInstallPrompt />
           </OfflineSyncProvider>
         </SessionProvider>
       </body>
