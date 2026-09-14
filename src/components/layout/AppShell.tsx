@@ -22,6 +22,7 @@ import {
     MapPin,
     ShieldAlert,
     User,
+    Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types";
@@ -48,6 +49,7 @@ const SUPERADMIN_NAV = [
     { href: "/superadmin/locations", label: "Manajemen Lokasi", icon: MapPin },
     { href: "/superadmin/hazard-types", label: "Manajemen Jenis Bahaya", icon: ShieldAlert },
     { href: "/superadmin/reports", label: "Manajemen Laporan", icon: FileText },
+    { href: "/superadmin/settings", label: "Pengaturan Sistem", icon: Settings },
 ];
 
 /**

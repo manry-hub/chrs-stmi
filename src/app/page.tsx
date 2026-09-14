@@ -4,9 +4,11 @@ import { ROUTES } from "@/constants";
 import { Button } from "@/components/ui/Button";
 import { auth } from "@/lib/auth";
 import { EmergencyCallButton } from "@/components/ui/EmergencyCallButton";
+import { getActiveEmergencyContact } from "@/actions/settings/emergencyContacts";
 
 export default async function HomePage() {
     const session = await auth();
+    const activeContact = await getActiveEmergencyContact();
 
     return (
         <div className="relative min-h-screen flex flex-col items-center justify-center py-10 sm:py-12 px-4 sm:px-6 md:px-8 overflow-hidden">
@@ -53,7 +55,7 @@ export default async function HomePage() {
                 </div>
                 
                 <div className="mt-8 sm:mt-10 md:mt-12 flex justify-center">
-                    <EmergencyCallButton />
+                    <EmergencyCallButton phoneNumber={activeContact.phone} name={activeContact.name} />
                 </div>
             </div>
         </div>

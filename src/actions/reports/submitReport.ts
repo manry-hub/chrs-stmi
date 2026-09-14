@@ -21,6 +21,20 @@ export async function submitReport(formData: unknown) {
   console.log("SubmitReport Input:", JSON.stringify(formData, null, 2));
   const data = submitReportSchema.parse(formData);
 
+  if (data.draftId) {
+    // Idempotency check: Ensure we don't duplicate offline drafts
+    const existingSnap = await adminDb.collection("reports")
+        .where("userId", "==", session.user.id)
+        .where("draftId", "==", data.draftId)
+        .limit(1)
+        .get();
+
+    if (!existingSnap.empty) {
+        console.log(`Report with draftId ${data.draftId} already exists. Skipping creation.`);
+        return { success: true, reportId: existingSnap.docs[0].id };
+    }
+  }
+
   const reportRef = adminDb.collection("reports").doc();
 
   await reportRef.set({

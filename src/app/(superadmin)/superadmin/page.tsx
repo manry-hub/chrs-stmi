@@ -1,10 +1,8 @@
 import { getAnalytics } from "@/actions/analytics/getAnalytics";
 import { getAdminPerformance, getLocationPerformance } from "@/actions/admin/performance";
-import { getNotificationSettings } from "@/actions/notifications/notificationSettings";
 import { FileText, AlertTriangle, CheckCircle, Clock, ClipboardList, MapPin } from "lucide-react";
 import { SuperadminCharts } from "@/components/superadmin/SuperadminCharts";
 import { DashboardDateFilter } from "@/components/superadmin/DashboardDateFilter";
-import { NotificationSettingsCard } from "@/components/superadmin/NotificationSettingsCard";
 import { DateFilterRange } from "@/lib/utils";
 
 interface PageProps {
@@ -15,11 +13,10 @@ export default async function SuperadminDashboard({ searchParams }: PageProps) {
   const { date } = await searchParams;
   const dateFilter = (date as DateFilterRange) || "hari";
 
-  const [{ total, pending, confirmed, done, avgResponseMinutes, topSources, pendingList }, performances, locationPerformances, notifSettings] = await Promise.all([
+  const [{ total, pending, confirmed, done, avgResponseMinutes, topSources, pendingList }, performances, locationPerformances] = await Promise.all([
     getAnalytics(dateFilter),
     getAdminPerformance(dateFilter),
-    getLocationPerformance(dateFilter),
-    getNotificationSettings()
+    getLocationPerformance(dateFilter)
   ]);
 
   // Calculate totals for admin performance
@@ -257,9 +254,6 @@ export default async function SuperadminDashboard({ searchParams }: PageProps) {
             </table>
         </div>
       </div>
-
-      {/* Notification Settings */}
-      <NotificationSettingsCard initialThresholdHours={notifSettings.staleReportThresholdHours} />
 
     </div>
   );

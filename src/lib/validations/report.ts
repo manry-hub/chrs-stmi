@@ -11,6 +11,7 @@ export const submitReportSchema = z.object({
   assignedAdminId: z.string().optional(),
   additionalMessage: z.string().optional(),
   imageUrl: z.any().optional(),
+  draftId: z.string().optional(),
 });
 
 export type SubmitReportInput = z.infer<typeof submitReportSchema>;

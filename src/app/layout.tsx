@@ -34,6 +34,7 @@ export const viewport = {
 
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import SessionProvider from "@/components/providers/SessionProvider";
+import { OfflineSyncProvider } from "@/components/providers/OfflineSyncProvider";
 
 export default function RootLayout({
   children,
@@ -47,8 +48,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <SessionProvider>
-          <ServiceWorkerRegister />
-          {children}
+          <OfflineSyncProvider>
+            <ServiceWorkerRegister />
+            {children}
+          </OfflineSyncProvider>
         </SessionProvider>
       </body>
     </html>

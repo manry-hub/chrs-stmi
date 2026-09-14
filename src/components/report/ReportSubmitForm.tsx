@@ -66,6 +66,8 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
         setIsSubmitting(true);
         setSubmitError(null);
 
+        const draftId = crypto.randomUUID();
+
         try {
             const isGeofenceEnabled = process.env.NEXT_PUBLIC_ENABLE_GEOFENCING === "true";
             
@@ -97,6 +99,32 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
                 }
             }
 
+            const locationData = data.location as any;
+            const draftPayload = {
+                id: draftId,
+                formData: {
+                    description: data.description,
+                    additionalMessage: data.additionalMessage,
+                    location: {
+                        name: locationData.name,
+                        lat,
+                        lng,
+                        locationId: locationData.locationId,
+                        assignedAdminId: locationData.assignedAdminId,
+                    }
+                },
+                imageFile: data.image as File
+            };
+
+            // Check online status before upload/submit
+            if (!navigator.onLine) {
+                const { saveDraft } = await import("@/lib/offlineSync");
+                await saveDraft(draftPayload);
+                toast.success("Anda sedang offline. Laporan disimpan ke Draft dan akan otomatis dikirim saat online.");
+                router.push(ROUTES.DASHBOARD); // or wherever to reset/go to list
+                return;
+            }
+
             // 3. Upload Image
             let imageUrl: string | undefined = undefined;
             if (data.image) {
@@ -108,16 +136,21 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
                     body: formData,
                 });
 
-                if (!uploadRes.ok) throw new Error("Gagal mengunggah gambar");
+                if (!uploadRes.ok) {
+                    // Try to guess if it's a network issue or server 500
+                    if (uploadRes.status >= 500) {
+                       throw new Error("Gagal mengunggah gambar karena kesalahan server.");
+                    }
+                    throw new Error("Gagal mengunggah gambar.");
+                }
                 const uploadData = await uploadRes.json();
                 imageUrl = uploadData.url;
             }
 
             // 4. Submit to Server Action
-            const locationData = data.location as any;
-            
             const payload = {
                 ...data,
+                draftId,
                 location: {
                     name: locationData.name,
                     lat,
@@ -135,8 +168,30 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
 
             toast.success("Laporan berhasil dikirim!");
             router.push(`${ROUTES.REPORTS}/${res.reportId}`);
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
+            // Catch TypeError which is usually fetch network error
+            if (err instanceof TypeError && err.message === "Failed to fetch") {
+                const { saveDraft } = await import("@/lib/offlineSync");
+                const locationData = data.location as any;
+                await saveDraft({
+                    id: draftId,
+                    formData: {
+                        description: data.description,
+                        additionalMessage: data.additionalMessage,
+                        location: {
+                            name: locationData.name,
+                            locationId: locationData.locationId,
+                            assignedAdminId: locationData.assignedAdminId,
+                        }
+                    },
+                    imageFile: data.image as File
+                });
+                toast.success("Koneksi bermasalah. Laporan disimpan ke Draft dan akan otomatis dikirim saat online.");
+                router.push(ROUTES.DASHBOARD);
+                return;
+            }
+
             const msg = err instanceof Error ? err.message : "Terjadi kesalahan sistem.";
             setSubmitError(msg);
             toast.error(msg);
