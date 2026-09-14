@@ -37,7 +37,7 @@ export function SuperadminCharts({ total, pendingList, topSources }: SuperadminC
                 </div>
                 
                 {pendingList.length > 0 ? (
-                    <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+                    <div className="flex-1 overflow-y-auto pr-2 space-y-3 max-h-[250px]">
                         {pendingList.map(report => (
                             <Link href={`/superadmin/reports/${report.id}`} key={report.id} className="block group">
                                 <div className="p-3 rounded-xl border border-slate-100 bg-slate-50 group-hover:bg-amber-50/50 group-hover:border-amber-100 transition-colors">

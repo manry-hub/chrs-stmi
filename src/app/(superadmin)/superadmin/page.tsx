@@ -104,7 +104,7 @@ export default async function SuperadminDashboard({ searchParams }: PageProps) {
         {/* Unified Header & Summary */}
         <div className="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-6">
             <div>
-                <h2 className="text-base sm:text-lg font-bold text-slate-900">Kinerja Cleaning Service</h2>
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">Kinerja per Cleaning Service</h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-1">Pantau performa penyelesaian laporan oleh masing-masing personel.</p>
             </div>
         </div>
@@ -185,7 +185,7 @@ export default async function SuperadminDashboard({ searchParams }: PageProps) {
         {/* Unified Header & Summary */}
         <div className="p-4 sm:p-6 border-b border-slate-200 bg-slate-50/50 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 sm:gap-6">
             <div>
-                <h2 className="text-base sm:text-lg font-bold text-slate-900">Kinerja Cleaning Service per Lokasi</h2>
+                <h2 className="text-base sm:text-lg font-bold text-slate-900">Kinerja per Lokasi</h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-1">Pantau performa penyelesaian laporan berdasarkan area atau lokasi.</p>
             </div>
         </div>
