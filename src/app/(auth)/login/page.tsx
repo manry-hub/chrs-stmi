@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn, getSession } from "next-auth/react";
@@ -29,10 +29,15 @@ function getRedirectPath(role?: string, loc?: string | null): string {
 export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isHydrated, setIsHydrated] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const loc = searchParams.get("loc");
+
+    useEffect(() => {
+        setIsHydrated(true);
+    }, []);
 
     const {
         register,
@@ -77,7 +82,7 @@ export default function LoginPage() {
                 <p className="text-slate-500 mt-2 text-sm">Masuk untuk melaporkan sumber potensi bahya baru</p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form data-testid="login-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div>
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" type="email" placeholder="mahasiswa@univ.edu" {...register("email")} />
@@ -99,9 +104,9 @@ export default function LoginPage() {
                     {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
                 </div>
 
-                {error && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
+                {error && <div data-testid="login-error" role="alert" className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{error}</div>}
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button data-testid="login-submit" type="submit" className="w-full" disabled={isLoading}>
                     {isLoading ? "Memproses..." : "Masuk"}
                 </Button>
             </form>

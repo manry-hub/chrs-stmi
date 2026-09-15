@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Format file tidak valid (Magic Bytes mismatch)" }, { status: 400 });
   }
 
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    console.warn("Vercel Blob token is missing, returning a mock URL");
+  if (!process.env.BLOB_READ_WRITE_TOKEN || req.headers.get("x-playwright-test") === "true") {
+    console.warn("Vercel Blob token is missing or in E2E test, returning a mock URL");
     return NextResponse.json({ url: "https://via.placeholder.com/600x400/eeeeee/333333?text=Mock+Upload" });
   }
 

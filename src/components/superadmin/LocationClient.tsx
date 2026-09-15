@@ -115,11 +115,22 @@ export function LocationClient({ initialData, admins }: LocationClientProps) {
 
     return (
         <div className="space-y-6">
-            <div className="flex justify-start">
-                <Button onClick={handleCreateClick} className="shadow-lg shadow-blue-500/20">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Tambah Lokasi Baru
-                </Button>
+            <div className="flex flex-row justify-between items-start gap-4 mb-6">
+                <div>
+                    <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Manajemen Lokasi & Admin</h1>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-1">Kelola daftar lokasi, tugaskan admin penanggung jawab, dan buat QR Code.</p>
+                </div>
+                <div className="shrink-0 mt-1 sm:mt-0">
+                    <Button onClick={handleCreateClick} size="sm" className="shadow-lg shadow-blue-500/20 text-xs sm:text-sm px-2 sm:px-4 hidden sm:flex">
+                        <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Tambah Lokasi Baru</span>
+                        <span className="sm:hidden">Tambah</span>
+                    </Button>
+                    <Button onClick={handleCreateClick} size="sm" className="shadow-lg shadow-blue-500/20 text-[10px] px-2 h-8 flex sm:hidden">
+                        <Plus className="w-3 h-3 mr-1" />
+                        Tambah
+                    </Button>
+                </div>
             </div>
 
             {locations.length === 0 ? (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useTransition } from "react";
+import { useEffect, useTransition, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { userFormSchema, type UserFormInput, updateUserSchema } from "@/lib/validations/user";
@@ -9,7 +9,7 @@ import { updateUser } from "@/actions/users/updateUser";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import type { UserRole } from "@/types";
 
@@ -29,6 +29,7 @@ interface UserModalProps {
 
 export function UserModal({ isOpen, onClose, user }: UserModalProps) {
   const [isPending, startTransition] = useTransition();
+  const [showPassword, setShowPassword] = useState(false);
   const isEdit = !!user;
 
   const {
@@ -149,9 +150,9 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
               {...register("role")}
               className="w-full h-11 px-3.5 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
             >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-              <option value="superadmin">Superadmin</option>
+              <option value="user">Civitas Akademika</option>
+              <option value="admin">Cleaning Service</option>
+              <option value="superadmin">Kepala CS</option>
             </select>
             {errors.role && <p className="text-xs text-red-500">{errors.role.message}</p>}
           </div>
@@ -159,13 +160,23 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
           {!isEdit && (
             <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                {...register("password")}
-                placeholder="Minimal 6 karakter"
-                error={errors.password?.message}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  {...register("password")}
+                  placeholder="Minimal 6 karakter"
+                  error={errors.password?.message}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
           )}
 

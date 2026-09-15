@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+e2e/.auth/
+.playwright/
 
 # next.js
 /.next/
@@ -40,3 +42,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 chrs.todo
+
+/test-results

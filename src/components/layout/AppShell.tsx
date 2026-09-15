@@ -199,7 +199,7 @@ export function AppShell({ role, userName, children }: AppShellProps) {
                     </Link>
                     <button
                         onClick={() => signOut({ callbackUrl: "/login" })}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-red-400 hover:bg-slate-800 transition-all duration-200"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-slate-800 transition-all duration-200"
                     >
                         <LogOut className="w-4 h-4 shrink-0" />
                         <span className="truncate">Logout</span>

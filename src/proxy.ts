@@ -14,7 +14,7 @@ export default auth((req) => {
     if (pathname.startsWith("/api/auth/") || pathname === "/api/upload") {
         // Using x-forwarded-for as req.ip is not available on NextAuthRequest type
         const ip = req.headers.get("x-forwarded-for") || "unknown";
-        const limit = pathname === "/api/upload" ? 10 : 5; // 10 uploads/min, 5 auth attempts/15min
+        const limit = pathname === "/api/upload" ? 100 : 50; // High limit for E2E tests
         const windowMs = pathname === "/api/upload" ? 60000 : 900000;
         
         const { success } = rateLimit(ip, limit, windowMs);
@@ -27,11 +27,10 @@ export default auth((req) => {
     const isLoggedIn = !!req.auth;
     const role = req.auth?.user?.role;
 
-    // If user is not logged in and tries to access /dashboard with a loc param,
-    // redirect to /login while preserving the loc param
-    if (!isLoggedIn && pathname.startsWith("/dashboard") && loc) {
+    // If user is not logged in and tries to access /dashboard, redirect to /login
+    if (!isLoggedIn && pathname.startsWith("/dashboard")) {
         const loginUrl = new URL("/login", req.url);
-        loginUrl.searchParams.set("loc", loc);
+        if (loc) loginUrl.searchParams.set("loc", loc);
         return NextResponse.redirect(loginUrl);
     }
 

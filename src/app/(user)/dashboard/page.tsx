@@ -8,6 +8,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     const { loc } = await searchParams;
     const [locations, hazardTypes] = await Promise.all([getLocations(), getHazardTypes()]);
 
+    const rawEnv = process.env.NEXT_PUBLIC_ENABLE_GEOFENCING;
+    const envValue = (rawEnv || "").replace(/['"]/g, "").trim().toLowerCase();
+    const isGeofenceEnabled = envValue === "true";
+    console.log("DashboardPage GEOFENCE DEBUG:", { rawEnv, envValue, isGeofenceEnabled });
+
     return (
         <div className="space-y-6">
             {/* Page Header */}
@@ -19,7 +24,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
             </div>
 
             <div className="max-w-3xl">
-                <ReportSubmitForm locations={locations} hazardTypes={hazardTypes} initialLocationId={loc} />
+                <ReportSubmitForm locations={locations} hazardTypes={hazardTypes} initialLocationId={loc} isGeofenceEnabled={isGeofenceEnabled} />
             </div>
         </div>
     );

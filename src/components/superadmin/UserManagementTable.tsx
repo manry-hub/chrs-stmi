@@ -6,7 +6,7 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { UserModal } from "./UserModal";
 import { Button } from "@/components/ui/Button";
 import toast from "react-hot-toast";
-import { Trash2, Shield, UserPlus, Edit2 } from "lucide-react";
+import { Trash2, Shield, UserPlus, Edit2, Users } from "lucide-react";
 
 interface UserRow {
   id: string;
@@ -71,34 +71,54 @@ export function UserManagementTable({ users: initialUsers }: UserManagementTable
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <Button onClick={handleCreate} className="shadow-lg shadow-blue-500/20">
-          <UserPlus className="w-4 h-4 mr-2" />
-          Tambah User Baru
-        </Button>
-        
-        <div className="flex bg-slate-100 p-1 rounded-lg w-fit overflow-x-auto">
+      {/* Page Header integrated in Client Component to share Modal state */}
+      <div className="flex flex-row justify-between items-start gap-4 mb-2 sm:mb-0">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Manajemen User</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Kelola pengguna dan atur hak akses.
+          </p>
+        </div>
+        <div className="shrink-0 mt-1 sm:mt-0">
+          <Button onClick={handleCreate} size="sm" className="shadow-lg shadow-blue-500/20 text-xs sm:text-sm px-2 sm:px-4 hidden sm:flex">
+            <UserPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
+            <span className="hidden sm:inline">Tambah User Baru</span>
+            <span className="sm:hidden">Tambah</span>
+          </Button>
+          <Button onClick={handleCreate} size="sm" className="shadow-lg shadow-blue-500/20 text-[10px] px-2 h-8 flex sm:hidden">
+            <UserPlus className="w-3 h-3 mr-1" />
+            Tambah
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 mt-4 sm:mt-0">
+        <div className="flex w-full sm:w-auto items-center justify-center gap-2 bg-white rounded-lg border border-slate-200 px-4 py-2 shadow-sm shrink-0">
+          <Users className="w-4 h-4 text-slate-500" />
+          <span className="text-sm font-semibold text-slate-700">{initialUsers.length} user terdaftar</span>
+        </div>
+        <div className="flex bg-slate-100 p-1 rounded-lg w-full sm:w-fit overflow-x-auto shrink-0">
             <button
                 onClick={() => setFilterRole("all")}
-                className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
                 Semua
             </button>
             <button
                 onClick={() => setFilterRole("superadmin")}
-                className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "superadmin" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "superadmin" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
                 Kepala CS
             </button>
             <button
                 onClick={() => setFilterRole("admin")}
-                className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "admin" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "admin" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
                 Cleaning Service
             </button>
             <button
                 onClick={() => setFilterRole("user")}
-                className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "user" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${filterRole === "user" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
             >
                 Civitas Akademika
             </button>

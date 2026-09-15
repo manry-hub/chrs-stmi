@@ -23,9 +23,10 @@ interface ReportSubmitFormProps {
     locations?: LocationDocument[];
     hazardTypes?: HazardTypeDocument[];
     initialLocationId?: string;
+    isGeofenceEnabled?: boolean;
 }
 
-export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLocationId }: ReportSubmitFormProps) {
+export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLocationId, isGeofenceEnabled }: ReportSubmitFormProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const router = useRouter();
@@ -69,12 +70,14 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
         const draftId = crypto.randomUUID();
 
         try {
-            const isGeofenceEnabled = process.env.NEXT_PUBLIC_ENABLE_GEOFENCING === "true";
+            const rawEnv = process.env.NEXT_PUBLIC_ENABLE_GEOFENCING;
+            const envValueFallback = (rawEnv || "").replace(/['"]/g, "").trim().toLowerCase();
+            const geofenceActive = isGeofenceEnabled ?? (envValueFallback === "true");
             
             let lat = 0;
             let lng = 0;
 
-            if (isGeofenceEnabled) {
+            if (geofenceActive) {
                 // 1. Dapatkan GPS otomatis
                 const position = await new Promise<GeolocationPosition>((resolve, reject) => {
                     if (!navigator.geolocation) {

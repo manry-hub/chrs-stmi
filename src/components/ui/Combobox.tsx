@@ -95,11 +95,13 @@ export function Combobox({ options, value, onChange, placeholder, error, classNa
             </div>
             
             {isOpen && (
-                <ul className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-auto py-1">
+                <ul role="listbox" className="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-60 overflow-auto py-1">
                     {filteredOptions.length > 0 ? (
                         filteredOptions.map((opt) => (
                             <li
                                 key={opt.value}
+                                role="option"
+                                aria-selected={inputValue === opt.label}
                                 onClick={() => handleOptionClick(opt.value, opt.label)}
                                 className="px-3.5 py-2 text-sm text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors"
                             >
@@ -107,11 +109,11 @@ export function Combobox({ options, value, onChange, placeholder, error, classNa
                             </li>
                         ))
                     ) : allowCustom ? (
-                        <li className="px-3.5 py-2 text-sm text-slate-500 italic">
+                        <li role="option" aria-selected={false} className="px-3.5 py-2 text-sm text-slate-500 italic">
                             Tekan enter atau biarkan untuk menggunakan "{inputValue}"
                         </li>
                     ) : (
-                        <li className="px-3.5 py-2 text-sm text-slate-500 italic">
+                        <li role="option" aria-selected={false} className="px-3.5 py-2 text-sm text-slate-500 italic">
                             Pilihan tidak ditemukan
                         </li>
                     )}
