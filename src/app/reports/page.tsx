@@ -16,7 +16,8 @@ async function getPublicReports() {
             return {
                 id: doc.id,
                 ...data,
-                createdAt: data.createdAt, // Firebase Admin timestamp
+                createdAt: data.createdAt?.toMillis ? data.createdAt.toMillis() : data.createdAt,
+                updatedAt: data.updatedAt?.toMillis ? data.updatedAt.toMillis() : data.updatedAt,
             } as ReportDocument;
         });
     } catch (error) {
