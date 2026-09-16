@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 
 import { useRouter } from "next/navigation";
 import type { SubmitReportInput as ReportInput } from "@/lib/validations/report";
 import { submitReport } from "@/actions/reports/submitReport";
 import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
 import { Textarea } from "../ui/Textarea";
 import { Combobox } from "../ui/Combobox";
 import { Label } from "../ui/Label";
@@ -16,8 +17,10 @@ import { ROUTES } from "@/constants";
 import toast from "react-hot-toast";
 import { LocationDocument, HazardTypeDocument } from "@/types";
 import { isWithinSTMI } from "@/lib/utils/geofence";
+import { getDeviceId, getSavedReporterName, saveReporterName } from "@/lib/deviceId";
+import { uploadReportImage } from "@/lib/uploadImage";
 
-type FormInput = Omit<ReportInput, "imageUrl"> & { image?: File };
+type FormInput = Omit<ReportInput, "imageUrl" | "deviceId"> & { image?: File };
 
 interface ReportSubmitFormProps {
     locations?: LocationDocument[];
@@ -37,10 +40,16 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
         register,
         handleSubmit,
         control,
+        setValue,
+        reset,
         formState: { errors },
     } = useForm<FormInput>({
         resolver: async (values) => {
             const errs: Record<string, { type: string; message: string }> = {};
+
+            if (!values.reporterName || values.reporterName.trim().length < 3) {
+                errs.reporterName = { type: "required", message: "Nama pelapor minimal 3 karakter" };
+            }
 
             if (!values.image) {
                 errs.image = { type: "required", message: "Foto kejadian wajib diunggah" };
@@ -63,11 +72,21 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
         },
     });
 
+    // Prefill setelah mount, bukan lewat defaultValues, agar markup server dan
+    // klien tetap sama saat hidrasi.
+    useEffect(() => {
+        const saved = getSavedReporterName();
+        if (saved) setValue("reporterName", saved);
+    }, [setValue]);
+
     const onSubmit = async (data: FormInput) => {
         setIsSubmitting(true);
         setSubmitError(null);
 
         const draftId = crypto.randomUUID();
+        const deviceId = getDeviceId();
+        const reporterName = data.reporterName.trim();
+        saveReporterName(reporterName);
 
         try {
             const rawEnv = process.env.NEXT_PUBLIC_ENABLE_GEOFENCING;
@@ -106,6 +125,8 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
                 const draftPayload = {
                 id: draftId,
                 formData: {
+                    reporterName,
+                    deviceId,
                     description: data.description,
                     additionalMessage: data.additionalMessage,
                     locationId: locationData.locationId,
@@ -124,35 +145,22 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
                 const { saveDraft } = await import("@/lib/offlineSync");
                 await saveDraft(draftPayload);
                 toast.success("Anda sedang offline. Laporan disimpan ke Draft dan akan otomatis dikirim saat online.");
-                router.push(ROUTES.DASHBOARD); // or wherever to reset/go to list
+                reset({ reporterName });
+                router.refresh();
                 return;
             }
 
             // 3. Upload Image
             let imageUrl: string | undefined = undefined;
             if (data.image) {
-                const formData = new FormData();
-                formData.append("file", data.image);
-
-                const uploadRes = await fetch("/api/upload", {
-                    method: "POST",
-                    body: formData,
-                });
-
-                if (!uploadRes.ok) {
-                    // Try to guess if it's a network issue or server 500
-                    if (uploadRes.status >= 500) {
-                       throw new Error("Gagal mengunggah gambar karena kesalahan server.");
-                    }
-                    throw new Error("Gagal mengunggah gambar.");
-                }
-                const uploadData = await uploadRes.json();
-                imageUrl = uploadData.url;
+                imageUrl = await uploadReportImage(data.image, deviceId);
             }
 
             // 4. Submit to Server Action
             const payload = {
                 ...data,
+                reporterName,
+                deviceId,
                 draftId,
                 location: {
                     name: locationData.name,
@@ -180,6 +188,8 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
                 await saveDraft({
                     id: draftId,
                     formData: {
+                        reporterName,
+                        deviceId,
                         description: data.description,
                         additionalMessage: data.additionalMessage,
                         locationId: locationData.locationId,
@@ -191,7 +201,8 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
                     imageFile: data.image as File
                 });
                 toast.success("Koneksi bermasalah. Laporan disimpan ke Draft dan akan otomatis dikirim saat online.");
-                router.push(ROUTES.DASHBOARD);
+                reset({ reporterName });
+                router.refresh();
                 return;
             }
 
@@ -206,6 +217,19 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-slate-100">
             <div className="space-y-4">
+                <div>
+                    <Label htmlFor="reporterName" className="mb-2 block">
+                        Nama Pelapor
+                    </Label>
+                    <Input
+                        id="reporterName"
+                        placeholder="Nama lengkap Anda"
+                        autoComplete="name"
+                        {...register("reporterName")}
+                        error={errors.reporterName?.message as string}
+                    />
+                </div>
+
                 <div>
                     <Label className="mb-2 block">Foto Kejadian</Label>
                     <Controller

@@ -27,9 +27,12 @@ export default function AdminDashboard() {
     return unsub;
   }, []);
 
+  // Laporan bertanda spam tidak muncul di daftar tugas maupun statistiknya.
+  const visibleReports = reports.filter(r => r.isSpam !== true);
+
   const baseReports = viewMode === "my-locations" && session?.user?.id
-    ? reports.filter(r => r.assignedAdminId === session.user.id && isWithinDateRange(r.createdAt as any, dateFilter))
-    : reports.filter(r => isWithinDateRange(r.createdAt as any, dateFilter));
+    ? visibleReports.filter(r => r.assignedAdminId === session.user.id && isWithinDateRange(r.createdAt as any, dateFilter))
+    : visibleReports.filter(r => isWithinDateRange(r.createdAt as any, dateFilter));
 
   // Stats
   const totalReports = baseReports.length;

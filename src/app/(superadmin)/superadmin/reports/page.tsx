@@ -5,16 +5,19 @@ import { subscribeToAllReportsAdmin } from "@/lib/firebase/reports";
 import { ReportTable } from "@/components/admin/ReportTable";
 import { DateFilterBar } from "@/components/admin/DateFilterBar";
 import { ReportFilterBar } from "@/components/admin/ReportFilterBar";
+import { SpamVisibilityToggle } from "@/components/admin/SpamVisibilityToggle";
 import type { ReportDocument, ReportStatus } from "@/types";
 import { Loader2, Plus, PlusCircle } from "lucide-react";
 import { DateFilterRange, isWithinDateRange } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { ROUTES } from "@/constants";
 
 export default function SuperadminReportsPage() {
     const [reports, setReports] = useState<ReportDocument[]>([]);
     const [dateFilter, setDateFilter] = useState<DateFilterRange>("hari");
     const [statusFilter, setStatusFilter] = useState<ReportStatus | "all">("all");
+    const [showSpam, setShowSpam] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -36,8 +39,11 @@ export default function SuperadminReportsPage() {
     const filtered = reports.filter((r) => {
         const matchesDate = isWithinDateRange(r.createdAt as any, dateFilter);
         const matchesStatus = statusFilter === "all" || r.status === statusFilter;
-        return matchesDate && matchesStatus;
+        const matchesSpam = showSpam || !r.isSpam;
+        return matchesDate && matchesStatus && matchesSpam;
     });
+
+    const spamCount = reports.filter((r) => r.isSpam).length;
 
     return (
         <div className="space-y-6">
@@ -47,7 +53,7 @@ export default function SuperadminReportsPage() {
                     <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Manajemen Laporan</h1>
                     <p className="text-xs sm:text-sm text-slate-500 mt-1">Pantau seluruh laporan bahaya dari semua pengguna secara real-time.</p>
                 </div>
-                <Link href="/dashboard" className="shrink-0 mt-1 sm:mt-0">
+                <Link href={ROUTES.LAPOR} className="shrink-0 mt-1 sm:mt-0">
                     <Button size="sm" className="shadow-lg shadow-blue-500/20 text-xs sm:text-sm px-2 sm:px-4 hidden sm:flex">
                         <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-2" />
                         <span className="hidden sm:inline">Tambah Laporan</span>
@@ -62,6 +68,7 @@ export default function SuperadminReportsPage() {
 
             {/* Filter */}
             <div className="flex flex-row justify-end items-center gap-2 sm:gap-4 mb-6 mt-4 sm:mt-0">
+                <SpamVisibilityToggle value={showSpam} onChange={setShowSpam} count={spamCount} />
                 <ReportFilterBar value={statusFilter} onChange={setStatusFilter} />
                 <DateFilterBar value={dateFilter} onChange={setDateFilter} />
             </div>
@@ -80,7 +87,7 @@ export default function SuperadminReportsPage() {
                     </p>
                 </div>
             ) : (
-                <ReportTable reports={filtered} baseUrl="/admin/reports" allowDelete={true} />
+                <ReportTable reports={filtered} baseUrl="/admin/reports" allowDelete={true} allowSpamMark />
             )}
         </div>
     );

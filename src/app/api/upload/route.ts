@@ -1,11 +1,22 @@
-import { auth } from "@/lib/auth";
 import { put } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
 import { fileTypeFromBuffer } from "file-type";
+import { verifyUploadTicket } from "@/lib/uploadTicket";
+import { checkRateLimit } from "@/lib/rateLimitStore";
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Pelaporan kini publik, jadi gerbangnya tiket berumur pendek, bukan sesi.
+  const ticket = verifyUploadTicket(req.headers.get("x-upload-ticket"));
+  if (!ticket) {
+    return NextResponse.json({ error: "Tiket unggah tidak valid atau kedaluwarsa" }, { status: 401 });
+  }
+
+  // Dibatasi per perangkat, bukan per IP: WiFi kampus berada di balik NAT
+  // sehingga limit per-IP akan menjegal seluruh civitas sekaligus.
+  const { success } = await checkRateLimit("upload", ticket.deviceId, 20, 60000);
+  if (!success) {
+    return NextResponse.json({ error: "Terlalu banyak unggahan. Coba lagi sebentar." }, { status: 429 });
+  }
 
   const formData = await req.formData();
   const file = formData.get("file") as File;

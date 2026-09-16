@@ -66,7 +66,10 @@ export async function getAdminPerformance(dateFilter: DateFilterRange = "hari"):
 
         reportsSnapshot.docs.forEach(doc => {
             const data = doc.data();
-            
+
+            // Laporan spam tidak dihitung sebagai beban kerja siapa pun.
+            if (data.isSpam === true) return;
+
             // Check if this document falls into our date range
             const docDate = data.createdAt?.seconds ? new Date(data.createdAt.seconds * 1000) : null;
             if (!isWithinDateRange(docDate, dateFilter)) return;
@@ -154,7 +157,10 @@ export async function getLocationPerformance(dateFilter: DateFilterRange = "hari
 
         reportsSnapshot.docs.forEach(doc => {
             const data = doc.data();
-            
+
+            // Laporan spam tidak dihitung sebagai beban kerja siapa pun.
+            if (data.isSpam === true) return;
+
             // Check if this document falls into our date range
             const docDate = data.createdAt?.seconds ? new Date(data.createdAt.seconds * 1000) : null;
             if (!isWithinDateRange(docDate, dateFilter)) return;

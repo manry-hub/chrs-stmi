@@ -11,7 +11,8 @@ async function getPublicReports() {
     try {
         const snapshot = await adminDb.collection("reports").orderBy("createdAt", "desc").limit(50).get();
 
-        return snapshot.docs.map((doc) => {
+        // Laporan bertanda spam tidak ditampilkan ke publik.
+        return snapshot.docs.filter((doc) => doc.data().isSpam !== true).map((doc) => {
             const data = doc.data();
             return {
                 id: doc.id,

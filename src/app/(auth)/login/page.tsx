@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn, getSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { loginSchema, LoginInput } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -14,15 +13,15 @@ import { ROUTES } from "@/constants";
 import { Eye, EyeOff } from "lucide-react";
 
 /** Determine the correct landing page based on user role */
-function getRedirectPath(role?: string, loc?: string | null): string {
+function getRedirectPath(role?: string): string {
     switch (role) {
         case "superadmin":
             return "/superadmin";
         case "admin":
             return "/admin";
         default:
-            // If there's a loc param from QR Code, redirect to dashboard with it
-            return loc ? `${ROUTES.DASHBOARD}?loc=${loc}` : ROUTES.DASHBOARD;
+            // Akun civitas lama: tidak punya area khusus lagi, arahkan ke form publik.
+            return ROUTES.LAPOR;
     }
 }
 
@@ -32,8 +31,6 @@ export default function LoginPage() {
     const [isHydrated, setIsHydrated] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const loc = searchParams.get("loc");
 
     useEffect(() => {
         setIsHydrated(true);
@@ -62,7 +59,7 @@ export default function LoginPage() {
             } else {
                 // Fetch fresh session to get role, then redirect accordingly
                 const session = await getSession();
-                const redirectPath = getRedirectPath(session?.user?.role, loc);
+                const redirectPath = getRedirectPath(session?.user?.role);
                 router.push(redirectPath);
             }
         } catch (err) {
@@ -72,14 +69,11 @@ export default function LoginPage() {
         }
     };
 
-    // Build register link with loc param preserved
-    const registerHref = loc ? `${ROUTES.REGISTER}?loc=${loc}` : ROUTES.REGISTER;
-
     return (
         <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-100">
             <div className="mb-6 text-center">
                 <h1 className="text-2xl font-bold text-slate-900">Masuk Akun</h1>
-                <p className="text-slate-500 mt-2 text-sm">Masuk untuk melaporkan sumber potensi bahya baru</p>
+                <p className="text-slate-500 mt-2 text-sm">Khusus petugas cleaning service dan kepala CS</p>
             </div>
 
             <form data-testid="login-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -111,12 +105,7 @@ export default function LoginPage() {
                 </Button>
             </form>
 
-            <p className="mt-6 text-center text-sm text-slate-600">
-                Belum punya akun?{" "}
-                <Link href={registerHref} className="text-blue-600 hover:underline">
-                    Daftar sekarang
-                </Link>
-            </p>
+            
         </div>
     );
 }

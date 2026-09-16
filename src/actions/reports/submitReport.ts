@@ -1,61 +1,77 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { adminDb } from "@/lib/firebase/admin";
 import { submitReportSchema } from "@/lib/validations/report";
+import { REPORTER_SOURCE } from "@/constants";
+import { checkRateLimit } from "@/lib/rateLimitStore";
 import { FieldValue } from "firebase-admin/firestore";
 
 import { sendPushToAdmins, sendPushToAll } from "@/lib/notifications/sendPush";
 
+/**
+ * Mengirim laporan bahaya. Terbuka untuk publik: civitas akademika melapor
+ * tanpa login, identitasnya berupa nama yang diisi sendiri pada form plus
+ * `deviceId` (identitas lemah per-perangkat, bukan akun).
+ */
 export async function submitReport(formData: unknown) {
-  const session = await auth();
-  if (!session?.user?.role) {
-    throw new Error("Sesi tidak valid atau Anda tidak memiliki akses. Silakan login kembali.");
-  }
-
-  if (!session.user.id) {
-    throw new Error("ID Pengguna tidak ditemukan dalam sesi. Silakan logout dan login kembali untuk menyegarkan sesi Anda.");
-  }
-
   // Data submission removed from console logs to prevent sensitive data leakage
-  const data = submitReportSchema.parse(formData);
+  const { reporterName, deviceId, draftId, ...data } = submitReportSchema.parse(formData);
 
-  if (data.draftId) {
-    // Idempotency check: Ensure we don't duplicate offline drafts
-    const existingSnap = await adminDb.collection("reports")
-        .where("userId", "==", session.user.id)
-        .where("draftId", "==", data.draftId)
-        .limit(1)
-        .get();
-
-    if (!existingSnap.empty) {
-        console.log(`Report with draftId ${data.draftId} already exists. Skipping creation.`);
-        return { success: true, reportId: existingSnap.docs[0].id };
+  // Dibatasi per perangkat, bukan per IP: WiFi kampus berada di balik NAT
+  // sehingga limit per-IP akan menjegal seluruh civitas sekaligus.
+  if (deviceId) {
+    const { success } = await checkRateLimit("report", deviceId, 5, 60 * 60 * 1000);
+    if (!success) {
+      throw new Error("Terlalu banyak laporan dari perangkat ini. Coba lagi dalam satu jam.");
     }
   }
 
   const reportRef = adminDb.collection("reports").doc();
+  let existingReportId: string | null = null;
 
-  await reportRef.set({
-    userId: session.user.id,
-    userName: session.user.name || "Anonim",
-    ...data,
-    status: "pending",
-    createdAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
+  // Satu transaksi menangani tiga hal sekaligus:
+  //  1. idempotency draft offline (draftId adalah UUIDv4, unik secara global)
+  //  2. race saat dua tab menyinkronkan draft yang sama
+  //  3. atomisitas dokumen laporan bersama log pertamanya
+  await adminDb.runTransaction(async (tx) => {
+    if (draftId) {
+      const duplicates = await tx.get(
+        adminDb.collection("reports").where("draftId", "==", draftId).limit(1)
+      );
+
+      if (!duplicates.empty) {
+        existingReportId = duplicates.docs[0].id;
+        return;
+      }
+    }
+
+    tx.set(reportRef, {
+      userId: null,
+      userName: reporterName,
+      reporterSource: REPORTER_SOURCE.PUBLIC,
+      ...(deviceId ? { deviceId } : {}),
+      ...(draftId ? { draftId } : {}),
+      ...data,
+      status: "pending",
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    tx.set(reportRef.collection("logs").doc(), {
+      action: "created",
+      performedBy: deviceId || "public",
+      note: `Laporan dibuat oleh ${reporterName}`,
+      createdAt: FieldValue.serverTimestamp(),
+    });
   });
 
-  // Write initial log to subcollection
-  await reportRef.collection("logs").add({
-    action: "created",
-    performedBy: session.user.id,
-    note: `Laporan dibuat oleh ${session.user.name || "user"}`,
-    createdAt: FieldValue.serverTimestamp(),
-  });
+  if (existingReportId) {
+    console.log(`Report with draftId ${draftId} already exists. Skipping creation.`);
+    return { success: true, reportId: existingReportId as string };
+  }
 
   const reportDetailUrl = `/admin/reports/${reportRef.id}`;
   const locationName = data.location.name;
-  const reporterName = session.user.name || "Seorang user";
 
   // Send push notification to assigned admin + superadmins (fire and forget)
   sendPushToAdmins({
@@ -64,12 +80,12 @@ export async function submitReport(formData: unknown) {
     url: reportDetailUrl,
   }, data.assignedAdminId).catch(err => console.error("Critical error in report submission push:", err));
 
-  // Send push notification to ALL subscribed users (civitas), excluding the reporter
+  // Send push notification to ALL subscribed devices (civitas), excluding the reporter's device
   sendPushToAll({
     title: "⚠️ Laporan Bahaya Baru",
     body: `${reporterName} melaporkan: ${data.description} di ${locationName}.${data.additionalMessage ? ` Pesan: ${data.additionalMessage}` : ""}`,
     url: reportDetailUrl,
-  }, session.user.id).catch(err => console.error("Error sending push to all:", err));
+  }, deviceId).catch(err => console.error("Error sending push to all:", err));
 
   return { success: true, reportId: reportRef.id };
 }

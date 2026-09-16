@@ -86,11 +86,12 @@ export async function sendPushToSuperadmins(payload: { title: string; body: stri
   await sendToQuery(query, payload);
 }
 
-export async function sendPushToAll(payload: { title: string; body: string; url?: string }, excludeUserId?: string) {
+export async function sendPushToAll(payload: { title: string; body: string; url?: string }, excludeDeviceId?: string) {
   const query = adminDb.collection('pushSubscriptions');
   await sendToQuery(query, payload, (data) => {
-    // Skip the excluded user (e.g. the reporter)
-    if (excludeUserId && data.userId === excludeUserId) {
+    // Skip the reporter's own device. Pelapor kini anonim, jadi yang
+    // dicocokkan adalah deviceId, bukan userId.
+    if (excludeDeviceId && data.deviceId === excludeDeviceId) {
       return false;
     }
     return true;

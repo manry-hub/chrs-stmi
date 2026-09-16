@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { getDrafts, updateDraftStatus, deleteDraft, OfflineDraft } from "@/lib/offlineSync";
 import { submitReport } from "@/actions/reports/submitReport";
+import { uploadReportImage } from "@/lib/uploadImage";
+import { getDeviceId } from "@/lib/deviceId";
 import toast from "react-hot-toast";
 
 export function OfflineSyncProvider({ children }: { children: React.ReactNode }) {
@@ -61,29 +63,19 @@ export function OfflineSyncProvider({ children }: { children: React.ReactNode })
                     await updateDraftStatus(draft.id, "SYNCING");
                 }
                 
-                // 1. Upload Image
-                const formData = new FormData();
-                formData.append("file", draft.imageFile);
-
-                const uploadRes = await fetch("/api/upload", {
-                    method: "POST",
-                    body: formData,
-                });
-
-                if (!uploadRes.ok) {
-                    if (uploadRes.status >= 500) {
-                        throw new Error("Kesalahan server saat mengunggah gambar.");
-                    }
-                    throw new Error("Gagal mengunggah gambar laporan.");
-                }
-
-                const uploadData = await uploadRes.json();
-                const imageUrl = uploadData.url;
+                // 1. Upload Image. Tiket diambil di sini, bukan dari draft:
+                // draft bisa mengendap berhari-hari sementara tiket cepat kedaluwarsa.
+                const imageUrl = await uploadReportImage(
+                    draft.imageFile,
+                    draft.formData.deviceId || getDeviceId()
+                );
 
                 // 2. Submit Report
                 const payload = {
                     ...draft.formData,
                     draftId: draft.id,
+                    // Draft lama (pra-publik) belum punya nama pelapor.
+                    reporterName: draft.formData.reporterName || "Anonim",
                     // Fallback to location object for backward compatibility with old drafts
                     locationId: draft.formData.locationId || (draft.formData.location as any).locationId,
                     assignedAdminId: draft.formData.assignedAdminId || (draft.formData.location as any).assignedAdminId,

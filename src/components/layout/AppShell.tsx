@@ -16,8 +16,6 @@ import {
     Menu,
     X,
     PanelLeftClose,
-    ClipboardList,
-    PlusCircle,
     MapPin,
     ShieldAlert,
     User,
@@ -26,16 +24,17 @@ import {
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types";
 
+/**
+ * Shell ini khusus petugas. Civitas akademika melapor lewat halaman publik
+ * /lapor tanpa akun, jadi tidak ada lagi varian sidebar untuk mereka.
+ */
+type StaffRole = Extract<UserRole, "admin" | "superadmin">;
+
 interface AppShellProps {
-    role: UserRole;
+    role: StaffRole;
     userName: string;
     children: React.ReactNode;
 }
-
-const USER_NAV = [
-    { href: "/dashboard", label: "Lapor Baru", icon: PlusCircle },
-    { href: "/dashboard/reports", label: "Riwayat Laporan", icon: ClipboardList },
-];
 
 const ADMIN_NAV = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -52,33 +51,30 @@ const SUPERADMIN_NAV = [
 ];
 
 /**
- * Unified application shell used across all authenticated roles.
+ * Unified application shell used across authenticated staff roles.
  * Renders a header, collapsible sidebar, and main content area.
  */
 export function AppShell({ role, userName, children }: AppShellProps) {
     const pathname = usePathname();
     const isSuperadmin = role === "superadmin";
-    const isAdmin = role === "admin";
 
-    const navItems = isSuperadmin ? SUPERADMIN_NAV : isAdmin ? ADMIN_NAV : USER_NAV;
+    const navItems = isSuperadmin ? SUPERADMIN_NAV : ADMIN_NAV;
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [pendingCount, setPendingCount] = useState(0);
 
     // Subscribe to reports to get pending count
     useEffect(() => {
-        if (role === "user") return;
-        
         const unsub = subscribeToAllReportsAdmin(
             (data) => {
-                const count = data.filter((r) => r.status === "pending").length;
+                const count = data.filter((r) => r.status === "pending" && r.isSpam !== true).length;
                 setPendingCount(count);
             },
             (err) => console.error("Error fetching report count for sidebar:", err)
         );
         
         return () => unsub();
-    }, [role]);
+    }, []);
 
     // Auto-show on desktop, auto-hide on mobile
     useEffect(() => {
@@ -99,13 +95,9 @@ export function AppShell({ role, userName, children }: AppShellProps) {
     }, [pathname]);
 
     // Role-specific styling
-    const roleBadgeClass = isSuperadmin
-        ? "text-purple-300"
-        : isAdmin
-        ? "text-blue-300"
-        : "text-emerald-300";
+    const roleBadgeClass = isSuperadmin ? "text-purple-300" : "text-blue-300";
 
-    const roleLabel = isSuperadmin ? "kepala cs" : isAdmin ? "cleaning service" : "civitas akademika";
+    const roleLabel = isSuperadmin ? "kepala cs" : "cleaning service";
 
     return (
         <div className="flex min-h-screen bg-slate-50">

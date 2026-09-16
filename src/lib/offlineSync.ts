@@ -7,6 +7,8 @@ export interface OfflineDraft {
   createdAt: number;
   status: DraftStatus;
   formData: {
+    reporterName: string;
+    deviceId?: string;
     description: string;
     additionalMessage?: string;
     locationId?: string;

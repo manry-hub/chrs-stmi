@@ -43,7 +43,7 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
       name: "",
       email: "",
       phone: "",
-      role: "user",
+      role: "admin",
       password: "",
     },
   });
@@ -55,7 +55,7 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
         name: user.name || "",
         email: user.email || "",
         phone: user.phone || "",
-        role: (user.role as UserRole) || "user",
+        role: (user.role as UserRole) || "admin",
         password: "", // Password not used for edit
       });
     } else {
@@ -63,7 +63,7 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
         name: "",
         email: "",
         phone: "",
-        role: "user",
+        role: "admin",
         password: "",
       });
     }
@@ -150,7 +150,6 @@ export function UserModal({ isOpen, onClose, user }: UserModalProps) {
               {...register("role")}
               className="w-full h-11 px-3.5 rounded-xl border border-slate-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
             >
-              <option value="user">Civitas Akademika</option>
               <option value="admin">Cleaning Service</option>
               <option value="superadmin">Kepala CS</option>
             </select>

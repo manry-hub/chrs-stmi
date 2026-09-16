@@ -36,5 +36,11 @@ service cloud.firestore {
         allow write: if false; // Only via Admin SDK (server-side)
       }
     }
+
+    // Rate limit counters. Server-side only (Admin SDK bypasses these rules);
+    // klien tidak boleh membaca apalagi mengubah hitungannya.
+    match /rateLimits/{limitId} {
+      allow read, write: if false;
+    }
   }
 }

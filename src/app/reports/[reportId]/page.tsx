@@ -54,7 +54,7 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-wrap items-center gap-4 mb-6">
                     <Link
-                        href={session?.user ? (session.user.role === "admin" ? "/admin/reports" : session.user.role === "superadmin" ? "/superadmin/reports" : ROUTES.DASHBOARD_REPORTS) : ROUTES.REPORTS}
+                        href={session?.user?.role === "admin" ? "/admin/reports" : session?.user?.role === "superadmin" ? "/superadmin/reports" : ROUTES.REPORTS}
                         className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors"
                     >
                         <ArrowLeft className="w-4 h-4" />
@@ -147,7 +147,9 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ r
         </div>
     );
 
-    if (session?.user?.role) {
+    // Hanya petugas yang mendapat shell bersidebar; pengunjung publik dan akun
+    // civitas lama melihat versi polos.
+    if (session?.user?.role === "admin" || session?.user?.role === "superadmin") {
         return (
             <AppShell role={session.user.role} userName={session.user.name || "User"}>
                 {content}

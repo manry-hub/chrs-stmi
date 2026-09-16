@@ -9,14 +9,15 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
+  const role = session?.user?.role;
 
   // Protect admin routes - allow admin and superadmin
-  if (!session || !["admin", "superadmin"].includes(session.user.role)) {
+  if (role !== "admin" && role !== "superadmin") {
     redirect("/login");
   }
 
   return (
-    <AppShell role={session.user.role} userName={session.user.name || "Admin"}>
+    <AppShell role={role} userName={session?.user?.name || "Admin"}>
       {children}
       <ToastProvider />
     </AppShell>

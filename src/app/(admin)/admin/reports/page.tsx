@@ -5,12 +5,14 @@ import { subscribeToAllReportsAdmin } from "@/lib/firebase/reports";
 import { ReportTable } from "@/components/admin/ReportTable";
 import { DateFilterBar } from "@/components/admin/DateFilterBar";
 import { ReportFilterBar } from "@/components/admin/ReportFilterBar";
+import { SpamVisibilityToggle } from "@/components/admin/SpamVisibilityToggle";
 import type { ReportDocument, ReportStatus } from "@/types";
 import { Loader2, Plus } from "lucide-react";
 import { DateFilterRange, isWithinDateRange } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { useSession } from "next-auth/react";
+import { ROUTES } from "@/constants";
 
 export default function AdminReportsPage() {
   const { data: session } = useSession();
@@ -18,6 +20,7 @@ export default function AdminReportsPage() {
   const [dateFilter, setDateFilter] = useState<DateFilterRange>("hari");
   const [statusFilter, setStatusFilter] = useState<ReportStatus | "all">("all");
   const [viewMode, setViewMode] = useState<"all" | "my-locations">("my-locations");
+  const [showSpam, setShowSpam] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,8 +43,11 @@ export default function AdminReportsPage() {
     const isMyLoc = viewMode === "all" || (r.assignedAdminId === session?.user?.id);
     const matchesDate = isWithinDateRange(r.createdAt as any, dateFilter);
     const matchesStatus = statusFilter === "all" || r.status === statusFilter;
-    return isMyLoc && matchesDate && matchesStatus;
+    const matchesSpam = showSpam || !r.isSpam;
+    return isMyLoc && matchesDate && matchesStatus && matchesSpam;
   });
+
+  const spamCount = reports.filter((r) => r.isSpam).length;
 
   return (
     <div className="space-y-6">
@@ -53,7 +59,7 @@ export default function AdminReportsPage() {
             Daftar seluruh laporan bahaya yang masuk secara real-time.
           </p>
         </div>
-        <Link href="/dashboard" className="shrink-0 mt-0.5 sm:mt-0">
+        <Link href={ROUTES.LAPOR} className="shrink-0 mt-0.5 sm:mt-0">
           <Button className="shadow-md sm:shadow-lg shadow-blue-500/20 text-[10px] sm:text-sm h-7 sm:h-10 px-2 sm:px-4 py-0 sm:py-2">
             <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
             Tambah Laporan
@@ -86,8 +92,9 @@ export default function AdminReportsPage() {
           </div>
         </div>
 
-        <div className="flex overflow-x-auto pb-1 sm:pb-0 w-full">
+        <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 sm:pb-0 w-full">
           <ReportFilterBar value={statusFilter} onChange={setStatusFilter} />
+          <SpamVisibilityToggle value={showSpam} onChange={setShowSpam} count={spamCount} />
         </div>
       </div>
 
@@ -102,7 +109,7 @@ export default function AdminReportsPage() {
           <p className="text-sm">{error}</p>
         </div>
       ) : (
-        <ReportTable reports={baseReports} />
+        <ReportTable reports={baseReports} allowSpamMark />
       )}
     </div>
   );

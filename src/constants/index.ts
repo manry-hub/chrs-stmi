@@ -13,10 +13,17 @@ export const USER_ROLES = {
 export const ROUTES = {
     HOME: "/",
     LOGIN: "/login",
-    REGISTER: "/register",
-    DASHBOARD: "/dashboard",
-    DASHBOARD_REPORTS: "/dashboard/reports",
+    LAPOR: "/lapor",
     REPORTS: "/reports",
+} as const;
+
+/**
+ * Asal sebuah laporan. "public" = dikirim civitas akademika tanpa login,
+ * "account" = laporan lama dari era ketika civitas masih punya akun.
+ */
+export const REPORTER_SOURCE = {
+    PUBLIC: "public",
+    ACCOUNT: "account",
 } as const;
 
 export const HAZARD_TYPES = [

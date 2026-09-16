@@ -1,6 +1,7 @@
 import { getProfile } from "@/actions/users/getProfile";
 import { ProfileForm } from "./ProfileForm";
 import { redirect } from "next/navigation";
+import { ROUTES } from "@/constants";
 
 export const metadata = {
   title: "Profil | HazardReport",
@@ -10,7 +11,7 @@ export default async function ProfilePage() {
   const profile = await getProfile();
 
   if (!profile) {
-    redirect("/login");
+    redirect(ROUTES.LOGIN);
   }
 
   return (

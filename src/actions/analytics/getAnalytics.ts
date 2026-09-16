@@ -16,6 +16,8 @@ export async function getAnalytics(dateFilter: DateFilterRange = "hari") {
   const reports = reportsSnap.docs
     .map((d) => ({ id: d.id, ...d.data() }))
     .filter((r: any) => {
+        // Laporan spam tidak boleh mengotori metrik.
+        if (r.isSpam === true) return false;
         const dateStr = r.createdAt?.seconds ? new Date(r.createdAt.seconds * 1000) : null;
         return isWithinDateRange(dateStr, dateFilter);
     });
@@ -59,6 +61,7 @@ export async function getAnalytics(dateFilter: DateFilterRange = "hari") {
   // Wait, the rule is to fetch logs where action == "confirmed". That's fine.
   const responsePromises = reportsSnap.docs.map(async (doc) => {
     const data = doc.data();
+    if (data.isSpam === true) return null;
     if (data.status !== "confirmed" && data.status !== "done") return null;
     
     // Check if this document falls into our date range

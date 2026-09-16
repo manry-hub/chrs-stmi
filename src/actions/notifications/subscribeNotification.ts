@@ -5,30 +5,32 @@ import { adminDb } from "@/lib/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 
 // Use a more permissive type for the subscription object from the client
-export async function subscribeNotification(subscription: {
-  endpoint: string;
-  keys: {
-    p256dh: string;
-    auth: string;
-  };
-}) {
+export async function subscribeNotification(
+  subscription: {
+    endpoint: string;
+    keys: {
+      p256dh: string;
+      auth: string;
+    };
+  },
+  deviceId?: string
+) {
+  // Admin & kepala CS tetap terikat akun. Civitas akademika kini publik, jadi
+  // subscription-nya dikunci ke deviceId, bukan userId.
   const session = await auth();
+  const userId = session?.user?.id;
+  const docId = userId || deviceId;
 
-  if (!session) {
-    throw new Error("Unauthorized. Silakan login terlebih dahulu.");
-  }
-
-  const userId = session.user.id;
-
-  if (!userId) {
-    throw new Error("User ID not found in session.");
+  if (!docId) {
+    return { success: false, error: "Identitas perangkat tidak ditemukan." };
   }
 
   try {
-    await adminDb.collection("pushSubscriptions").doc(userId).set({
+    await adminDb.collection("pushSubscriptions").doc(docId).set({
       subscription,
-      userId,
-      role: session.user.role,
+      userId: userId || null,
+      deviceId: deviceId || null,
+      role: session?.user?.role || "public",
       updatedAt: FieldValue.serverTimestamp(),
     });
 

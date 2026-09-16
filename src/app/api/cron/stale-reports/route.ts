@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     // Filter out reports that already received a reminder
     const staleReports = pendingReports.docs.filter((doc) => {
       const data = doc.data();
-      return !data.reminderSentAt;
+      return !data.reminderSentAt && data.isSpam !== true;
     });
 
     if (staleReports.length === 0) {

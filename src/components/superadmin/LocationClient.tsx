@@ -86,7 +86,7 @@ export function LocationClient({ initialData, admins }: LocationClientProps) {
 
     const getReportUrl = (locId: string) => {
         if (typeof window === "undefined") return "";
-        return `${window.location.origin}/dashboard?loc=${locId}`;
+        return `${window.location.origin}/lapor?loc=${locId}`;
     };
 
     const handleDownloadQR = () => {

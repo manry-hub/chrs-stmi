@@ -5,6 +5,7 @@ import { Bell, BellOff, Loader2 } from "lucide-react";
 import { subscribeNotification } from "@/actions/notifications/subscribeNotification";
 import { unsubscribeNotification } from "@/actions/notifications/unsubscribeNotification";
 import { toast } from "react-hot-toast";
+import { getDeviceId } from "@/lib/deviceId";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
@@ -94,7 +95,7 @@ export function PushNotificationToggle() {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
       });
 
-      const result = await subscribeNotification(subscription.toJSON() as PushSubscriptionJSON);
+      const result = await subscribeNotification(subscription.toJSON() as PushSubscriptionJSON, getDeviceId());
       if (result.success) {
         setIsSubscribed(true);
         // Only show toast if it's not a silent background subscription
@@ -113,6 +114,15 @@ export function PushNotificationToggle() {
       return;
     }
 
+    // Di development serwist dimatikan, sehingga /sw.js adalah artefak build
+    // produksi. Mendaftarkannya akan menyuguhkan chunk basi dari cache dan
+    // memunculkan "Failed to find Server Action". Push memang hanya bisa
+    // diuji lewat build produksi.
+    if (process.env.NODE_ENV === "development") {
+      toast.error("Notifikasi push hanya aktif pada build produksi.");
+      return;
+    }
+
     setLoading(true);
     try {
       if (isSubscribed) {
@@ -122,7 +132,7 @@ export function PushNotificationToggle() {
           const subscription = await registration.pushManager.getSubscription();
           if (subscription) {
             await subscription.unsubscribe();
-            await unsubscribeNotification();
+            await unsubscribeNotification(getDeviceId());
             setIsSubscribed(false);
             toast.success("Notifikasi dinonaktifkan.", { id: "push-unsubscribe-toast" });
           }

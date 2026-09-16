@@ -5,14 +5,16 @@ import Link from "next/link";
 import { ReportStatusBadge } from "@/components/report/ReportStatusBadge";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { deleteReport } from "@/actions/reports/deleteReport";
+import { markReportSpam } from "@/actions/reports/markReportSpam";
 import toast from "react-hot-toast";
 import type { ReportDocument } from "@/types";
-import { MapPin, Clock, Eye, Trash2 } from "lucide-react";
+import { MapPin, Clock, Eye, Trash2, Ban, Undo2 } from "lucide-react";
 
 interface ReportTableProps {
     reports: ReportDocument[];
     baseUrl?: string;
     allowDelete?: boolean;
+    allowSpamMark?: boolean;
 }
 
 function formatDate(timestamp: { seconds: number } | null | undefined): string {
@@ -26,9 +28,42 @@ function formatDate(timestamp: { seconds: number } | null | undefined): string {
     });
 }
 
-export function ReportTable({ reports, baseUrl = "/admin/reports", allowDelete = false }: ReportTableProps) {
+export function ReportTable({ reports, baseUrl = "/admin/reports", allowDelete = false, allowSpamMark = false }: ReportTableProps) {
     const [deleteTarget, setDeleteTarget] = useState<ReportDocument | null>(null);
+    const [spamTarget, setSpamTarget] = useState<ReportDocument | null>(null);
     const [isPending, startTransition] = useTransition();
+
+    function handleSpamToggle(report: ReportDocument) {
+        // Membatalkan tanda spam tidak merusak apa pun, jadi langsung jalan.
+        // Menandai spam menyembunyikan laporan, jadi dikonfirmasi dulu.
+        if (report.isSpam) {
+            startTransition(async () => {
+                try {
+                    await markReportSpam({ reportId: report.id, isSpam: false });
+                    toast.success("Tanda spam dibatalkan");
+                } catch (err) {
+                    toast.error(err instanceof Error ? err.message : "Gagal membatalkan tanda spam");
+                }
+            });
+            return;
+        }
+        setSpamTarget(report);
+    }
+
+    async function handleSpamConfirm() {
+        if (!spamTarget) return;
+
+        startTransition(async () => {
+            try {
+                await markReportSpam({ reportId: spamTarget.id, isSpam: true });
+                toast.success("Laporan ditandai sebagai spam");
+                setSpamTarget(null);
+            } catch (err) {
+                toast.error(err instanceof Error ? err.message : "Gagal menandai laporan");
+                setSpamTarget(null);
+            }
+        });
+    }
 
     async function handleDelete() {
         if (!deleteTarget) return;
@@ -77,7 +112,7 @@ export function ReportTable({ reports, baseUrl = "/admin/reports", allowDelete =
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {reports.map((report) => (
-                                <tr key={report.id} className="hover:bg-blue-50/30 transition-colors duration-150">
+                                <tr key={report.id} className={`hover:bg-blue-50/30 transition-colors duration-150 ${report.isSpam ? "opacity-60" : ""}`}>
                                     <td className="py-3 px-4">
                                         <span className="font-medium text-slate-800">{report.userName}</span>
                                     </td>
@@ -93,7 +128,15 @@ export function ReportTable({ reports, baseUrl = "/admin/reports", allowDelete =
                                         </span>
                                     </td>
                                     <td className="py-3 px-4">
-                                        <ReportStatusBadge status={report.status} />
+                                        <div className="flex items-center gap-1.5">
+                                            <ReportStatusBadge status={report.status} />
+                                            {report.isSpam && (
+                                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold">
+                                                    <Ban className="w-3 h-3" />
+                                                    Spam
+                                                </span>
+                                            )}
+                                        </div>
                                     </td>
                                     <td className="py-3 px-4">
                                         <div className="flex items-center gap-1.5 text-slate-500 text-xs">
@@ -110,6 +153,18 @@ export function ReportTable({ reports, baseUrl = "/admin/reports", allowDelete =
                                                 <Eye className="w-3.5 h-3.5" />
                                                 Detail
                                             </Link>
+
+                                            {allowSpamMark && (
+                                                <button
+                                                    onClick={() => handleSpamToggle(report)}
+                                                    disabled={isPending}
+                                                    title={report.isSpam ? "Batalkan tanda spam" : "Tandai sebagai spam"}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg text-xs font-medium transition-colors duration-200 disabled:opacity-50"
+                                                >
+                                                    {report.isSpam ? <Undo2 className="w-3.5 h-3.5" /> : <Ban className="w-3.5 h-3.5" />}
+                                                    {report.isSpam ? "Bukan Spam" : "Spam"}
+                                                </button>
+                                            )}
 
                                             {allowDelete && (
                                                 <button
@@ -129,6 +184,16 @@ export function ReportTable({ reports, baseUrl = "/admin/reports", allowDelete =
                     </table>
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={!!spamTarget}
+                title="Tandai Sebagai Spam"
+                message="Laporan ini akan disembunyikan dari daftar publik dan tidak dihitung dalam analitik maupun performa petugas. Laporan tidak dihapus dan tandanya bisa dibatalkan kapan saja."
+                confirmLabel="Tandai Spam"
+                onConfirm={handleSpamConfirm}
+                onCancel={() => setSpamTarget(null)}
+                loading={isPending}
+            />
 
             <ConfirmDialog
                 open={!!deleteTarget}

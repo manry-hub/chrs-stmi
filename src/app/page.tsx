@@ -2,12 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { ROUTES } from "@/constants";
 import { Button } from "@/components/ui/Button";
-import { auth } from "@/lib/auth";
 import { EmergencyCallButton } from "@/components/ui/EmergencyCallButton";
 import { getActiveEmergencyContact } from "@/actions/settings/emergencyContacts";
 
 export default async function HomePage() {
-    const session = await auth();
     const activeContact = await getActiveEmergencyContact();
 
     return (
@@ -31,19 +29,13 @@ export default async function HomePage() {
 
                 <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 font-medium mb-8 sm:mb-10 md:mb-12 max-w-[95%] sm:max-w-2xl lg:max-w-3xl mx-auto leading-relaxed sm:leading-relaxed px-2 md:px-0 drop-shadow-sm">
                     Sistem pelaporan kondisi bahaya secara real-time untuk Civitas Akademika. Laporkan segera potensi kerusakan agar lingkungan kampus
-                    tetap aman dan nyaman.
+                    tetap aman dan nyaman. Tanpa perlu membuat akun.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 md:gap-5 w-full max-w-[280px] sm:max-w-none mx-auto">
-                    {session ? (
-                        <Button asChild size="lg" className="w-full sm:w-auto min-h-[48px] sm:min-h-[52px] md:min-h-[56px] px-6 sm:px-8 md:px-10 text-sm sm:text-base md:text-lg shadow-lg shadow-blue-500/25 rounded-xl">
-                            <Link href={ROUTES.DASHBOARD}>Lapor Sekarang</Link>
-                        </Button>
-                    ) : (
-                        <Button asChild size="lg" className="w-full sm:w-auto min-h-[48px] sm:min-h-[52px] md:min-h-[56px] px-6 sm:px-8 md:px-10 text-sm sm:text-base md:text-lg shadow-lg shadow-blue-500/25 rounded-xl">
-                            <Link href={ROUTES.LOGIN}>Lapor Sekarang</Link>
-                        </Button>
-                    )}
+                    <Button asChild size="lg" className="w-full sm:w-auto min-h-[48px] sm:min-h-[52px] md:min-h-[56px] px-6 sm:px-8 md:px-10 text-sm sm:text-base md:text-lg shadow-lg shadow-blue-500/25 rounded-xl">
+                        <Link href={ROUTES.LAPOR}>Lapor Sekarang</Link>
+                    </Button>
                     <Button
                         asChild
                         variant="outline"
