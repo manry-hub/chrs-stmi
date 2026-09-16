@@ -17,7 +17,8 @@ import { ROUTES } from "@/constants";
 import toast from "react-hot-toast";
 import { LocationDocument, HazardTypeDocument } from "@/types";
 import { getDeviceId, getSavedReporterName, saveReporterName } from "@/lib/deviceId";
-import { useVerifiedLocation } from "./LocationGate";
+import { acquireCampusLocation } from "@/lib/acquireCampusLocation";
+import { isGeofencingEnabled } from "@/lib/geofenceConfig";
 import { uploadReportImage } from "@/lib/uploadImage";
 import type { OfflineDraftInput } from "@/lib/offlineSync";
 
@@ -30,7 +31,7 @@ interface ReportSubmitFormProps {
 }
 
 export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLocationId }: ReportSubmitFormProps) {
-    const verifiedLocation = useVerifiedLocation();
+    const [isVerifyingLocation, setIsVerifyingLocation] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const router = useRouter();
@@ -95,12 +96,25 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
         let draftPayload: OfflineDraftInput | null = null;
 
         try {
-            // Koordinat berasal dari LocationGate, yang sudah memastikan posisi
-            // berada di kawasan kampus sebelum form ini dirender. Bernilai null
-            // hanya ketika geofencing dimatikan.
-            const lat = verifiedLocation?.lat;
-            const lng = verifiedLocation?.lng;
-            const accuracy = verifiedLocation?.accuracy;
+            let lat: number | undefined;
+            let lng: number | undefined;
+            let accuracy: number | undefined;
+
+            if (isGeofencingEnabled()) {
+                // Diverifikasi sebelum apa pun disimpan. Kegagalan di sini
+                // membatalkan pengiriman sepenuhnya: tidak ada laporan maupun
+                // draft yang dibuat tanpa informasi lokasi.
+                setIsVerifyingLocation(true);
+                const result = await acquireCampusLocation().finally(() => setIsVerifyingLocation(false));
+
+                if (!result.ok) {
+                    throw new Error(result.message);
+                }
+
+                lat = result.lat;
+                lng = result.lng;
+                accuracy = result.accuracy;
+            }
 
             const locationData = data.location as any;
             draftPayload = {
@@ -260,7 +274,11 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
             {submitError && <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">{submitError}</div>}
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Mengirim Laporan..." : "Kirim Laporan"}
+                {isVerifyingLocation
+                    ? "Memverifikasi lokasi..."
+                    : isSubmitting
+                    ? "Mengirim Laporan..."
+                    : "Kirim Laporan"}
             </Button>
         </form>
     );

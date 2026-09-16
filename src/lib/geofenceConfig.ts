@@ -25,7 +25,7 @@ export const maxAccuracyMeters = (): number => {
 };
 
 /** Berapa lama gerbang menunggu fix yang cukup akurat sebelum menyerah. */
-export const LOCATION_TIMEOUT_MS = 5000;
+export const LOCATION_TIMEOUT_MS = 25000;
 
 /**
  * Tenggat yang diberikan ke `watchPosition` itu sendiri.

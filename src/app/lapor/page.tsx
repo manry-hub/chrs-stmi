@@ -2,7 +2,6 @@ import { ReportSubmitForm } from "@/components/report/ReportSubmitForm";
 import { getLocations } from "@/actions/masterData/locations";
 import { getHazardTypes } from "@/actions/masterData/hazardTypes";
 import { PendingDraftsBanner } from "@/components/report/PendingDraftsBanner";
-import { LocationGate } from "@/components/report/LocationGate";
 
 export const revalidate = 0;
 
@@ -19,17 +18,13 @@ export default async function LaporPage({ searchParams }: { searchParams: Promis
             <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Lapor Sumber Potensi Bahaya</h1>
                 <p className="text-sm text-slate-500 mt-1">
-                    Tidak perlu akun. Pelaporan hanya dapat dilakukan dari dalam kawasan kampus.
+                    Tidak perlu akun. Lokasi Anda diverifikasi saat laporan dikirim.
                 </p>
             </div>
 
-            {/* Di luar gerbang: draft yang tertunda tetap harus terlihat pemiliknya
-                walau saat ini lokasinya belum terverifikasi. */}
             <PendingDraftsBanner />
 
-            <LocationGate>
-                <ReportSubmitForm locations={locations} hazardTypes={hazardTypes} initialLocationId={loc} />
-            </LocationGate>
+            <ReportSubmitForm locations={locations} hazardTypes={hazardTypes} initialLocationId={loc} />
         </div>
     );
 }

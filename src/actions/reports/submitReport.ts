@@ -28,8 +28,9 @@ export async function submitReport(formData: unknown) {
     }
   }
 
-  // Geofence diverifikasi ulang di sini. LocationGate menjaga halaman, bukan
-  // endpoint: server action ini publik dan bisa dipanggil tanpa membuka /lapor.
+  // Geofence diverifikasi ulang di sini. Pengecekan di klien hanya menjaga
+  // alur formnya; server action ini publik dan bisa dipanggil langsung tanpa
+  // pernah membuka /lapor.
   const geofenceEnabled = isGeofencingEnabled();
   const { lat, lng, accuracy } = data.location;
   const hasCoordinates = typeof lat === "number" && typeof lng === "number";
@@ -45,7 +46,7 @@ export async function submitReport(formData: unknown) {
 
     // Diperiksa hanya bila disertakan. Nilainya berasal dari klien sehingga
     // mudah dipalsukan; gunanya di sini sebagai lapisan tambahan, sementara
-    // penyaring sesungguhnya ada di LocationGate.
+    // penyaring sesungguhnya ada di acquireCampusLocation.
     if (typeof accuracy === "number" && accuracy > maxAccuracyMeters()) {
       throw new Error("Laporan ditolak: akurasi lokasi terlalu rendah untuk diverifikasi.");
     }
