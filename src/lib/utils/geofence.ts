@@ -3,15 +3,15 @@
  */
 
 // Koordinat Politeknik STMI Jakarta
-// export const STMI_COORDINATES = {
-//     lat: -6.1714, 
-//     lng: 106.8687
-// };
-// kordinat pengetesan
 export const STMI_COORDINATES = {
-    lat: -6.381918, 
-    lng: 106.878205
+    lat: -6.1714, 
+    lng: 106.8687
 };
+// kordinat pengetesan
+// export const STMI_COORDINATES = {
+//     lat: -6.381918, 
+//     lng: 106.878205
+// };
 
 // Radius toleransi dalam meter (cukup luas untuk mencakup GPS drift)
 export const STMI_RADIUS_METERS = 1000;

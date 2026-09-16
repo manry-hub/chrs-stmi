@@ -18,7 +18,7 @@ export default async function LaporPage({ searchParams }: { searchParams: Promis
             <div>
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900">Lapor Sumber Potensi Bahaya</h1>
                 <p className="text-sm text-slate-500 mt-1">
-                    Tidak perlu akun. Lokasi Anda diverifikasi saat laporan dikirim.
+                    Lengkapi formulir dibawah ini.
                 </p>
             </div>
 
