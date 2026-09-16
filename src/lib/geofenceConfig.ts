@@ -25,4 +25,14 @@ export const maxAccuracyMeters = (): number => {
 };
 
 /** Berapa lama gerbang menunggu fix yang cukup akurat sebelum menyerah. */
-export const LOCATION_TIMEOUT_MS = 25000;
+export const LOCATION_TIMEOUT_MS = 5000;
+
+/**
+ * Tenggat yang diberikan ke `watchPosition` itu sendiri.
+ *
+ * Sengaja lebih longgar dari LOCATION_TIMEOUT_MS agar tenggat kita yang selalu
+ * menang. Bila keduanya sama, dua timer habis berbarengan dan pesan yang muncul
+ * jadi bergantung siapa yang lebih dulu dijalankan. Galat izin tidak terpengaruh
+ * nilai ini, jadi penolakan izin tetap terdeteksi seketika.
+ */
+export const POSITION_ACQUISITION_TIMEOUT_MS = LOCATION_TIMEOUT_MS + 2000;

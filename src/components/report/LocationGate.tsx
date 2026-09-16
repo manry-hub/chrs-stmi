@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { MapPin, Loader2, ShieldAlert, RefreshCcw, Ban } from "lucide-react";
 import { isWithinSTMI, STMI_RADIUS_METERS } from "@/lib/utils/geofence";
-import { isGeofencingEnabled, maxAccuracyMeters, LOCATION_TIMEOUT_MS } from "@/lib/geofenceConfig";
+import { isGeofencingEnabled, maxAccuracyMeters, LOCATION_TIMEOUT_MS, POSITION_ACQUISITION_TIMEOUT_MS } from "@/lib/geofenceConfig";
 import { Button } from "@/components/ui/Button";
 
 export interface VerifiedLocation {
@@ -109,7 +109,7 @@ export function LocationGate({ children }: { children: React.ReactNode }) {
                     });
                 }
             },
-            { enableHighAccuracy: true, timeout: LOCATION_TIMEOUT_MS, maximumAge: 0 }
+            { enableHighAccuracy: true, timeout: POSITION_ACQUISITION_TIMEOUT_MS, maximumAge: 0 }
         );
 
         return stop;
@@ -131,8 +131,7 @@ export function LocationGate({ children }: { children: React.ReactNode }) {
                 <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800 mb-4">
                     <MapPin className="w-4 h-4 shrink-0" />
                     <span>
-                        Lokasi terverifikasi — Anda berada di kawasan Politeknik STMI Jakarta
-                        <span className="text-emerald-700/70"> (akurasi ±{Math.round(state.location.accuracy)} m)</span>
+                        Lokasi terverifikasi. Anda berada di kawasan Politeknik STMI Jakarta
                     </span>
                 </div>
                 {children}
@@ -154,7 +153,7 @@ function GateBlocked({ state, onRetry }: { state: Exclude<GateState, { status: "
                 </p>
                 {state.bestAccuracy !== null && (
                     <p className="mt-3 text-xs text-slate-400">
-                        Menajamkan sinyal… akurasi saat ini ±{Math.round(state.bestAccuracy)} m
+                        Menajamkan sinyal…
                     </p>
                 )}
             </div>
