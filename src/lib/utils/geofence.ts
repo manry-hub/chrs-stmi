@@ -14,7 +14,7 @@ export const STMI_COORDINATES = {
 };
 
 // Radius toleransi dalam meter (cukup luas untuk mencakup GPS drift)
-export const STMI_RADIUS_METERS = 100;
+export const STMI_RADIUS_METERS = 1000;
 
 /**
  * Menghitung jarak antara dua koordinat menggunakan rumus Haversine.
