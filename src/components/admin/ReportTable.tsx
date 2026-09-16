@@ -130,6 +130,15 @@ export function ReportTable({ reports, baseUrl = "/admin/reports", allowDelete =
                                     <td className="py-3 px-4">
                                         <div className="flex items-center gap-1.5">
                                             <ReportStatusBadge status={report.status} />
+                                            {report.locationVerified === false && (
+                                                <span
+                                                    title="Lokasi belum terverifikasi GPS"
+                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-semibold"
+                                                >
+                                                    <MapPin className="w-3 h-3" />
+                                                    Tanpa GPS
+                                                </span>
+                                            )}
                                             {report.isSpam && (
                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-semibold">
                                                     <Ban className="w-3 h-3" />

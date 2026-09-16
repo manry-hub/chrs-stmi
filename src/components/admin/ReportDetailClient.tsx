@@ -151,6 +151,15 @@ export function ReportDetailClient({ report, currentUserId, currentUserRole }: R
                                         <ExternalLink className="w-3 h-3" />
                                     </a>
                                 )}
+                                {report.locationVerified === false && (
+                                    <p className="inline-flex items-start gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1.5 mt-2">
+                                        <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                                        <span>
+                                            Lokasi belum terverifikasi GPS. Lokasi di atas diisi manual oleh pelapor,
+                                            jadi mohon dicek sendiri kebenarannya.
+                                        </span>
+                                    </p>
+                                )}
                             </div>
                         </div>
 

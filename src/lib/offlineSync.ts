@@ -23,9 +23,12 @@ export interface OfflineDraft {
   errorMessage?: string;
 }
 
+/** Draft sebagaimana dibentuk pemanggil, sebelum status dan waktu dilekatkan. */
+export type OfflineDraftInput = Omit<OfflineDraft, 'createdAt' | 'status'>;
+
 const STORE_PREFIX = 'draft_';
 
-export async function saveDraft(draft: Omit<OfflineDraft, 'createdAt' | 'status'>): Promise<OfflineDraft> {
+export async function saveDraft(draft: OfflineDraftInput): Promise<OfflineDraft> {
   const newDraft: OfflineDraft = {
     ...draft,
     createdAt: Date.now(),

@@ -30,8 +30,9 @@ export interface HazardTypeDocument {
 
 export interface ReportLocation {
     name: string;
-    lat: number;
-    lng: number;
+    /** Absen bila GPS tidak berhasil mendapatkan fix (mis. di dalam gedung). */
+    lat?: number;
+    lng?: number;
 }
 
 export interface ReportDocument {
@@ -41,6 +42,11 @@ export interface ReportDocument {
     /** Nama pelapor. Diisi dari input "Nama Pelapor" pada laporan publik. */
     userName: string;
     reporterSource?: ReporterSource;
+    /**
+     * true hanya bila server memverifikasi koordinat berada di kawasan kampus.
+     * Selalu dihitung di server; nilai dari klien tidak pernah dipercaya.
+     */
+    locationVerified?: boolean;
     /** Identitas lemah perangkat pengirim, bukan akun. */
     deviceId?: string;
     imageUrl: string;

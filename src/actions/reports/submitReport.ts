@@ -4,6 +4,7 @@ import { adminDb } from "@/lib/firebase/admin";
 import { submitReportSchema } from "@/lib/validations/report";
 import { REPORTER_SOURCE } from "@/constants";
 import { checkRateLimit } from "@/lib/rateLimitStore";
+import { isWithinSTMI } from "@/lib/utils/geofence";
 import { FieldValue } from "firebase-admin/firestore";
 
 import { sendPushToAdmins, sendPushToAll } from "@/lib/notifications/sendPush";
@@ -25,6 +26,27 @@ export async function submitReport(formData: unknown) {
       throw new Error("Terlalu banyak laporan dari perangkat ini. Coba lagi dalam satu jam.");
     }
   }
+
+  // Geofence diverifikasi ulang di sini. Pengecekan di klien hanya pagar UX:
+  // endpoint ini publik, jadi koordinat apa pun bisa dikirim langsung.
+  const geofenceEnabled =
+    (process.env.NEXT_PUBLIC_ENABLE_GEOFENCING || "").replace(/['"]/g, "").trim().toLowerCase() === "true";
+
+  const { lat, lng } = data.location;
+  const hasCoordinates = typeof lat === "number" && typeof lng === "number";
+
+  if (geofenceEnabled && hasCoordinates && !isWithinSTMI(lat, lng)) {
+    throw new Error("Laporan ditolak: lokasi berada di luar kawasan Politeknik STMI Jakarta.");
+  }
+
+  // Laporan tanpa koordinat tetap diterima: GPS sering gagal mendapatkan fix di
+  // dalam gedung, dan menolaknya berarti membuang laporan bahaya yang sah.
+  // Penandanya dipakai petugas untuk meninjau sendiri keabsahannya.
+  //
+  // Dibiarkan undefined saat geofencing mati: tidak ada kebijakan lokasi yang
+  // berlaku, jadi menandai "belum terverifikasi" pada setiap laporan hanya
+  // menghasilkan peringatan yang tidak berarti. Firestore mengabaikan undefined.
+  const locationVerified = geofenceEnabled ? hasCoordinates : undefined;
 
   const reportRef = adminDb.collection("reports").doc();
   let existingReportId: string | null = null;
@@ -49,6 +71,7 @@ export async function submitReport(formData: unknown) {
       userId: null,
       userName: reporterName,
       reporterSource: REPORTER_SOURCE.PUBLIC,
+      locationVerified,
       ...(deviceId ? { deviceId } : {}),
       ...(draftId ? { draftId } : {}),
       ...data,

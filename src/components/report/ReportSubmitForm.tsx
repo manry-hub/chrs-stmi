@@ -19,6 +19,7 @@ import { LocationDocument, HazardTypeDocument } from "@/types";
 import { isWithinSTMI } from "@/lib/utils/geofence";
 import { getDeviceId, getSavedReporterName, saveReporterName } from "@/lib/deviceId";
 import { uploadReportImage } from "@/lib/uploadImage";
+import type { OfflineDraftInput } from "@/lib/offlineSync";
 
 type FormInput = Omit<ReportInput, "imageUrl" | "deviceId"> & { image?: File };
 
@@ -88,41 +89,55 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
         const reporterName = data.reporterName.trim();
         saveReporterName(reporterName);
 
+        // Dipakai ulang oleh jalur offline maupun jalur koneksi putus di tengah
+        // pengiriman. Sebelumnya kedua jalur membangun draft sendiri-sendiri dan
+        // yang satu kehilangan koordinat.
+        let draftPayload: OfflineDraftInput | null = null;
+
         try {
             const rawEnv = process.env.NEXT_PUBLIC_ENABLE_GEOFENCING;
             const envValueFallback = (rawEnv || "").replace(/['"]/g, "").trim().toLowerCase();
             const geofenceActive = isGeofenceEnabled ?? (envValueFallback === "true");
-            
-            let lat = 0;
-            let lng = 0;
+
+            let lat: number | undefined;
+            let lng: number | undefined;
 
             if (geofenceActive) {
-                // 1. Dapatkan GPS otomatis
-                const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+                // GPS tidak butuh internet, tapi fix-nya sering gagal di dalam
+                // gedung atau di perangkat tanpa chip GNSS. Kegagalan itu tidak
+                // boleh membatalkan laporan: server menerimanya sebagai laporan
+                // tanpa koordinat dan menandainya belum terverifikasi.
+                const position = await new Promise<GeolocationPosition | null>((resolve) => {
                     if (!navigator.geolocation) {
-                        reject(new Error("Browser Anda tidak mendukung geolokasi."));
-                    } else {
-                        navigator.geolocation.getCurrentPosition(resolve, reject, {
-                            enableHighAccuracy: true,
-                            timeout: 10000,
-                            maximumAge: 0,
-                        });
+                        resolve(null);
+                        return;
                     }
-                }).catch(() => {
-                    throw new Error("Gagal mendapatkan lokasi. Pastikan GPS aktif dan izin diberikan.");
+                    navigator.geolocation.getCurrentPosition(
+                        resolve,
+                        () => resolve(null),
+                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                    );
                 });
 
-                lat = position.coords.latitude;
-                lng = position.coords.longitude;
+                if (position) {
+                    lat = position.coords.latitude;
+                    lng = position.coords.longitude;
 
-                // 2. Cek Geofence
-                if (!isWithinSTMI(lat, lng)) {
-                    throw new Error("Laporan ditolak: Anda berada di luar kawasan Politeknik STMI Jakarta.");
+                    // Koordinat berhasil didapat dan jelas di luar kawasan:
+                    // ini penolakan tegas, bukan kasus GPS tidak tersedia.
+                    if (!isWithinSTMI(lat, lng)) {
+                        throw new Error("Laporan ditolak: Anda berada di luar kawasan Politeknik STMI Jakarta.");
+                    }
+                } else {
+                    toast("Lokasi tidak terdeteksi. Laporan tetap dikirim dan akan ditinjau petugas.", {
+                        icon: "📍",
+                        id: "geofence-unavailable",
+                    });
                 }
             }
 
             const locationData = data.location as any;
-                const draftPayload = {
+            draftPayload = {
                 id: draftId,
                 formData: {
                     reporterName,
@@ -181,25 +196,12 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
             router.push(`${ROUTES.REPORTS}/${res.reportId}`);
         } catch (err: any) {
             console.error(err);
-            // Catch TypeError which is usually fetch network error
-            if (err instanceof TypeError && err.message === "Failed to fetch") {
+            // Catch TypeError which is usually fetch network error.
+            // draftPayload bisa masih null bila kegagalan terjadi sebelum draft
+            // terbentuk; dalam kasus itu jatuh ke penanganan error biasa.
+            if (err instanceof TypeError && err.message === "Failed to fetch" && draftPayload) {
                 const { saveDraft } = await import("@/lib/offlineSync");
-                const locationData = data.location as any;
-                await saveDraft({
-                    id: draftId,
-                    formData: {
-                        reporterName,
-                        deviceId,
-                        description: data.description,
-                        additionalMessage: data.additionalMessage,
-                        locationId: locationData.locationId,
-                        assignedAdminId: locationData.assignedAdminId,
-                        location: {
-                            name: locationData.name,
-                        }
-                    },
-                    imageFile: data.image as File
-                });
+                await saveDraft(draftPayload);
                 toast.success("Koneksi bermasalah. Laporan disimpan ke Draft dan akan otomatis dikirim saat online.");
                 reset({ reporterName });
                 router.refresh();
