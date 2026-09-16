@@ -16,8 +16,8 @@ import { LocationPicker } from "./LocationPicker";
 import { ROUTES } from "@/constants";
 import toast from "react-hot-toast";
 import { LocationDocument, HazardTypeDocument } from "@/types";
-import { isWithinSTMI } from "@/lib/utils/geofence";
 import { getDeviceId, getSavedReporterName, saveReporterName } from "@/lib/deviceId";
+import { useVerifiedLocation } from "./LocationGate";
 import { uploadReportImage } from "@/lib/uploadImage";
 import type { OfflineDraftInput } from "@/lib/offlineSync";
 
@@ -27,10 +27,10 @@ interface ReportSubmitFormProps {
     locations?: LocationDocument[];
     hazardTypes?: HazardTypeDocument[];
     initialLocationId?: string;
-    isGeofenceEnabled?: boolean;
 }
 
-export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLocationId, isGeofenceEnabled }: ReportSubmitFormProps) {
+export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLocationId }: ReportSubmitFormProps) {
+    const verifiedLocation = useVerifiedLocation();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const router = useRouter();
@@ -95,46 +95,12 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
         let draftPayload: OfflineDraftInput | null = null;
 
         try {
-            const rawEnv = process.env.NEXT_PUBLIC_ENABLE_GEOFENCING;
-            const envValueFallback = (rawEnv || "").replace(/['"]/g, "").trim().toLowerCase();
-            const geofenceActive = isGeofenceEnabled ?? (envValueFallback === "true");
-
-            let lat: number | undefined;
-            let lng: number | undefined;
-
-            if (geofenceActive) {
-                // GPS tidak butuh internet, tapi fix-nya sering gagal di dalam
-                // gedung atau di perangkat tanpa chip GNSS. Kegagalan itu tidak
-                // boleh membatalkan laporan: server menerimanya sebagai laporan
-                // tanpa koordinat dan menandainya belum terverifikasi.
-                const position = await new Promise<GeolocationPosition | null>((resolve) => {
-                    if (!navigator.geolocation) {
-                        resolve(null);
-                        return;
-                    }
-                    navigator.geolocation.getCurrentPosition(
-                        resolve,
-                        () => resolve(null),
-                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                    );
-                });
-
-                if (position) {
-                    lat = position.coords.latitude;
-                    lng = position.coords.longitude;
-
-                    // Koordinat berhasil didapat dan jelas di luar kawasan:
-                    // ini penolakan tegas, bukan kasus GPS tidak tersedia.
-                    if (!isWithinSTMI(lat, lng)) {
-                        throw new Error("Laporan ditolak: Anda berada di luar kawasan Politeknik STMI Jakarta.");
-                    }
-                } else {
-                    toast("Lokasi tidak terdeteksi. Laporan tetap dikirim dan akan ditinjau petugas.", {
-                        icon: "📍",
-                        id: "geofence-unavailable",
-                    });
-                }
-            }
+            // Koordinat berasal dari LocationGate, yang sudah memastikan posisi
+            // berada di kawasan kampus sebelum form ini dirender. Bernilai null
+            // hanya ketika geofencing dimatikan.
+            const lat = verifiedLocation?.lat;
+            const lng = verifiedLocation?.lng;
+            const accuracy = verifiedLocation?.accuracy;
 
             const locationData = data.location as any;
             draftPayload = {
@@ -150,6 +116,7 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
                         name: locationData.name,
                         lat,
                         lng,
+                        accuracy,
                     }
                 },
                 imageFile: data.image as File
@@ -180,7 +147,8 @@ export function ReportSubmitForm({ locations = [], hazardTypes = [], initialLoca
                 location: {
                     name: locationData.name,
                     lat,
-                    lng
+                    lng,
+                    accuracy,
                 },
                 locationId: locationData.locationId,
                 assignedAdminId: locationData.assignedAdminId,

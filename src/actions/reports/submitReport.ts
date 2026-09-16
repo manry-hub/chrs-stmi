@@ -5,6 +5,7 @@ import { submitReportSchema } from "@/lib/validations/report";
 import { REPORTER_SOURCE } from "@/constants";
 import { checkRateLimit } from "@/lib/rateLimitStore";
 import { isWithinSTMI } from "@/lib/utils/geofence";
+import { isGeofencingEnabled, maxAccuracyMeters } from "@/lib/geofenceConfig";
 import { FieldValue } from "firebase-admin/firestore";
 
 import { sendPushToAdmins, sendPushToAll } from "@/lib/notifications/sendPush";
@@ -27,26 +28,33 @@ export async function submitReport(formData: unknown) {
     }
   }
 
-  // Geofence diverifikasi ulang di sini. Pengecekan di klien hanya pagar UX:
-  // endpoint ini publik, jadi koordinat apa pun bisa dikirim langsung.
-  const geofenceEnabled =
-    (process.env.NEXT_PUBLIC_ENABLE_GEOFENCING || "").replace(/['"]/g, "").trim().toLowerCase() === "true";
-
-  const { lat, lng } = data.location;
+  // Geofence diverifikasi ulang di sini. LocationGate menjaga halaman, bukan
+  // endpoint: server action ini publik dan bisa dipanggil tanpa membuka /lapor.
+  const geofenceEnabled = isGeofencingEnabled();
+  const { lat, lng, accuracy } = data.location;
   const hasCoordinates = typeof lat === "number" && typeof lng === "number";
 
-  if (geofenceEnabled && hasCoordinates && !isWithinSTMI(lat, lng)) {
-    throw new Error("Laporan ditolak: lokasi berada di luar kawasan Politeknik STMI Jakarta.");
+  if (geofenceEnabled) {
+    if (!hasCoordinates) {
+      throw new Error("Laporan ditolak: lokasi belum terverifikasi.");
+    }
+
+    if (!isWithinSTMI(lat, lng)) {
+      throw new Error("Laporan ditolak: lokasi berada di luar kawasan Politeknik STMI Jakarta.");
+    }
+
+    // Diperiksa hanya bila disertakan. Nilainya berasal dari klien sehingga
+    // mudah dipalsukan; gunanya di sini sebagai lapisan tambahan, sementara
+    // penyaring sesungguhnya ada di LocationGate.
+    if (typeof accuracy === "number" && accuracy > maxAccuracyMeters()) {
+      throw new Error("Laporan ditolak: akurasi lokasi terlalu rendah untuk diverifikasi.");
+    }
   }
 
-  // Laporan tanpa koordinat tetap diterima: GPS sering gagal mendapatkan fix di
-  // dalam gedung, dan menolaknya berarti membuang laporan bahaya yang sah.
-  // Penandanya dipakai petugas untuk meninjau sendiri keabsahannya.
-  //
   // Dibiarkan undefined saat geofencing mati: tidak ada kebijakan lokasi yang
-  // berlaku, jadi menandai "belum terverifikasi" pada setiap laporan hanya
-  // menghasilkan peringatan yang tidak berarti. Firestore mengabaikan undefined.
-  const locationVerified = geofenceEnabled ? hasCoordinates : undefined;
+  // berlaku, jadi menandai apa pun hanya menyesatkan. Firestore mengabaikan
+  // undefined sehingga field-nya tidak ditulis.
+  const locationVerified = geofenceEnabled ? true : undefined;
 
   const reportRef = adminDb.collection("reports").doc();
   let existingReportId: string | null = null;

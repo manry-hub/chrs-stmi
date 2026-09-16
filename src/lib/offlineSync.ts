@@ -17,6 +17,7 @@ export interface OfflineDraft {
       name: string;
       lat?: number;
       lng?: number;
+      accuracy?: number;
     };
   };
   imageFile: File; // File object stored as Blob/File in IDB

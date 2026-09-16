@@ -11,6 +11,7 @@ export const submitReportSchema = z.object({
     name: z.string().min(1, "Nama lokasi wajib diisi"),
     lat: z.number().optional(),
     lng: z.number().optional(),
+    accuracy: z.number().optional(),
   }),
   locationId: z.string().optional(),
   assignedAdminId: z.string().optional(),

@@ -30,9 +30,11 @@ export interface HazardTypeDocument {
 
 export interface ReportLocation {
     name: string;
-    /** Absen bila GPS tidak berhasil mendapatkan fix (mis. di dalam gedung). */
+    /** Absen hanya bila geofencing dimatikan; selain itu selalu terisi. */
     lat?: number;
     lng?: number;
+    /** Ketidakpastian pembacaan posisi dalam meter, apa adanya dari browser. */
+    accuracy?: number;
 }
 
 export interface ReportDocument {
