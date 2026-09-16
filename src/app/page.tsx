@@ -9,7 +9,7 @@ export default async function HomePage() {
     const activeContact = await getActiveEmergencyContact();
 
     return (
-        <div className="relative min-h-screen flex flex-col items-center justify-center py-10 sm:py-12 px-4 sm:px-6 md:px-8 overflow-hidden">
+        <div className="relative min-h-screen flex flex-col items-center justify-center pt-10 sm:pt-12 pb-20 sm:pb-24 px-4 sm:px-6 md:px-8 overflow-hidden">
             {/* Background Image */}
             <Image src="/background.webp" alt="Kampus Background" fill priority className="object-cover -z-20" quality={90} />
 
@@ -50,6 +50,19 @@ export default async function HomePage() {
                     <EmergencyCallButton phoneNumber={activeContact.phone} name={activeContact.name} />
                 </div>
             </div>
+
+            {/* Pintu masuk petugas. Sengaja kecil dan di bawah: civitas tidak
+                perlu akun, jadi ini hanya untuk cleaning service & kepala CS. */}
+            <footer className="absolute inset-x-0 bottom-0 z-10 px-4 pb-5 sm:pb-6">
+                <p className="text-center text-[11px] sm:text-xs text-white/60">
+                    <Link
+                        href={ROUTES.LOGIN}
+                        className="underline underline-offset-4 hover:text-white transition-colors"
+                    >
+                        Masuk sebagai petugas
+                    </Link>
+                </p>
+            </footer>
         </div>
     );
 }

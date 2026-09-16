@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { subscribeToReportLogs } from "@/lib/firebase/reports";
 import { confirmReport } from "@/actions/reports/confirmReport";
 import { markReportDone } from "@/actions/reports/markReportDone";
+import { uploadReportImage } from "@/lib/uploadImage";
+import { getDeviceId } from "@/lib/deviceId";
 import { ActivityLogTimeline } from "@/components/admin/ActivityLogTimeline";
 import { ReportStatusBadge } from "@/components/report/ReportStatusBadge";
 import { ImagePreview } from "@/components/report/ImagePreview";
@@ -67,17 +69,7 @@ export function ReportDetailClient({ report, currentUserId, currentUserRole }: R
 
         setLoading(true);
         try {
-            const formData = new FormData();
-            formData.append("file", proofImage);
-
-            const uploadRes = await fetch("/api/upload", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!uploadRes.ok) throw new Error("Gagal mengunggah foto bukti");
-            const uploadData = await uploadRes.json();
-            const uploadedUrl = uploadData.url;
+            const uploadedUrl = await uploadReportImage(proofImage, getDeviceId());
 
             await markReportDone({ reportId: report.id, proofImageUrl: uploadedUrl });
             setCurrentStatus("done");

@@ -23,13 +23,17 @@ export async function uploadReportImage(file: File, deviceId: string): Promise<s
     });
 
     if (!res.ok) {
+        // Teruskan pesan dari server bila ada; jauh lebih menolong saat
+        // menelusuri masalah daripada pesan generik.
+        const detail = await res.json().then((body) => body?.error).catch(() => null);
+
         if (res.status === 429) {
-            throw new Error("Terlalu banyak unggahan dari perangkat ini. Coba lagi sebentar.");
+            throw new Error(detail || "Terlalu banyak unggahan dari perangkat ini. Coba lagi sebentar.");
         }
         if (res.status >= 500) {
             throw new Error("Gagal mengunggah gambar karena kesalahan server.");
         }
-        throw new Error("Gagal mengunggah gambar.");
+        throw new Error(detail || "Gagal mengunggah gambar.");
     }
 
     const data = await res.json();
